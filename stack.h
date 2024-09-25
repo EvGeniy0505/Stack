@@ -20,14 +20,14 @@ struct Stack
     type_of_elem * data;
 };
 
-int pop(Stack * stk);   // удаляет последний элемент стека и возвращает его значение
+int pop(Stack * stk);   
 
-void push(Stack * stk, type_of_elem new_stack_value);  // добавляет новый элемент в стек, перераспределяет память
+void push(Stack * stk, type_of_elem new_stack_value);  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 
-int init(Stack * stk, size_t capacity);   // создает стек, по-другому конструктор
+int init(Stack * stk, size_t capacity);   // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-//void destructor(Stack * stk);  // делает так, чтоб стек не работал
+//void destructor(Stack * stk);  // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-int Stack_OK(const Stack * stk); // проверка на ошибки
+int Stack_OK(const Stack * stk); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 
 #endif // STACK
