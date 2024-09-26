@@ -7,7 +7,7 @@ int main()
 
     double del_val = 0;
 
-    int err = 0;
+    int err = 1;
 
     CHECK init(&stk, 8);
 
