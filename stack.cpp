@@ -22,7 +22,7 @@ int push(Stack* stk, type_of_elem new_stack_value)
 {
     if(stk -> size_of_stack + 1 == stk -> capacity_of_stack)
     {
-        stk -> data = (type_of_elem*)realloc(stk -> data, stk -> capacity_of_stack * 2); 
+        stk -> data = (type_of_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(type_of_elem) * 2); 
     }
 
     if(stk -> data == NULL)
@@ -39,15 +39,15 @@ int push(Stack* stk, type_of_elem new_stack_value)
 
 int pop(Stack* stk, double* del_value)
 {
-    // if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / 4)
-    // {
-    //     stk -> data = (type_of_elem*)realloc(stk -> data, stk -> capacity_of_stack / 4);
-    // }
+    if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / 4)
+    {
+        stk -> data = (type_of_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(type_of_elem) / 4);
+    }
 
     assert(Stack_OK(stk));
 
     *del_value = stk -> data[stk -> size_of_stack];
-
+ 
     stk -> data[stk -> size_of_stack] = 0;
 
     stk -> size_of_stack--;
