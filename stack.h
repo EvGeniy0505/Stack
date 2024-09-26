@@ -2,14 +2,29 @@
 #define STACK
 
 #define CHECK if(!err) err = 
+#define ERROR_CHECK int err = 0;
+
 
 #include <string.h>
+#include <stdio.h>
 
 typedef double type_of_elem;
 
 enum Errors
 {
     SEGM_FAULT = -1
+};
+
+enum text_colors
+{
+    BLACK = 30,
+    RED,
+    GREEN,
+    YELLOW,
+    BLUE,
+    PURPLE,
+    LIGHT_BLUE,
+    WHITE
 };
 
 struct Stack
@@ -31,6 +46,8 @@ void Dtor(Stack* stk);
 
 int Stack_OK(Stack* stk); 
 
-void dump(const Stack* stk);
+void color_printf(FILE* stream, int color, const char* format, ...);
+
+void dump(Stack* stk);
 
 #endif 

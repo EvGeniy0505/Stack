@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 int init(Stack* stk, size_t capasity)
 {
@@ -30,10 +31,10 @@ int push(Stack* stk, type_of_elem new_stack_value)
         return SEGM_FAULT;
     }
 
-    stk -> data[stk -> size_of_stack + 1] = new_stack_value;
+    stk -> data[stk -> size_of_stack] = new_stack_value;
 
     stk -> size_of_stack++;
-
+    
     return 0;
 }
 
@@ -46,18 +47,37 @@ int pop(Stack* stk, double* del_value)
 
     assert(Stack_OK(stk));
 
+    stk -> size_of_stack--;
+
     *del_value = stk -> data[stk -> size_of_stack];
  
     stk -> data[stk -> size_of_stack] = 0;
 
-    stk -> size_of_stack--;
-
     return 0;
+}
+
+void dump(Stack* stk)
+{
+    color_printf(stdout, PURPLE, "ALL STACK: ");
+
+    for(size_t i = 0; i < stk -> capacity_of_stack; i++)
+    {
+        printf("%lf ", stk -> data[i]);
+    }
+
+    putchar('\n');
+
+    color_printf(stdout, GREEN, "Capacity:%zu\n", stk -> capacity_of_stack);
+    color_printf(stdout, RED, "Size:%zu\n", stk -> size_of_stack);
 }
 
 int Stack_OK(Stack* stk)
 {
     if(stk -> data == NULL)
+    {
+        return SEGM_FAULT;
+    }
+    else if(stk -> size_of_stack > 0 && stk -> capacity_of_stack > stk -> size_of_stack)
     {
         return SEGM_FAULT;
     }
@@ -70,3 +90,25 @@ void Dtor(Stack* stk)
     free(stk -> data);   
 }
 
+// void fill_in_Stack(Stack* stk)
+// {
+//     for(int i = 0; i < stk -> capacity_of_stack; i++)
+//     {
+        
+//     }
+// }
+
+void color_printf(FILE* stream, int color, const char* format, ...)
+{
+    va_list args;
+
+    va_start(args, format);
+
+    fprintf(stream, "\x1B[7;%dm", color);
+
+    vfprintf(stream, format, args);
+
+    fprintf(stream, "\x1B[0;%dm", WHITE);
+
+    va_end(args);
+}
