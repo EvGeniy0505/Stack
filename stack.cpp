@@ -11,25 +11,25 @@ int init(Stack* stk, size_t capasity)
     stk -> capacity_of_stack = capasity;
     stk -> size_of_stack     = 0;
 
-    if(stk -> data == NULL)
-    {
-        return SEGM_FAULT;
-    }
+    Stack_fill_in(stk);
+
+    assert(Stack_OK(stk));
 
     return 0;
 }
 
 int push(Stack* stk, type_of_elem new_stack_value)
 {
-    if(stk -> size_of_stack + 1 == stk -> capacity_of_stack)
+    if(stk -> size_of_stack == stk -> capacity_of_stack)
     {
-        stk -> data = (type_of_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(type_of_elem) * 2); 
+        stk -> capacity_of_stack = stk -> capacity_of_stack * 2;
+
+        stk -> data = (type_of_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(type_of_elem)); 
+
+        Stack_fill_in(stk);
     }
 
-    if(stk -> data == NULL)
-    {
-        return SEGM_FAULT;
-    }
+    assert(Stack_OK(stk));
 
     stk -> data[stk -> size_of_stack] = new_stack_value;
 
@@ -42,7 +42,9 @@ int pop(Stack* stk, double* del_value)
 {
     if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / 4)
     {
-        stk -> data = (type_of_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(type_of_elem) / 4);
+        stk -> capacity_of_stack = stk -> capacity_of_stack / 4;
+
+        stk -> data = (type_of_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(type_of_elem));
     }
 
     assert(Stack_OK(stk));
@@ -51,7 +53,7 @@ int pop(Stack* stk, double* del_value)
 
     *del_value = stk -> data[stk -> size_of_stack];
  
-    stk -> data[stk -> size_of_stack] = 0;
+    stk -> data[stk -> size_of_stack] = Stack_defolt_value;
 
     return 0;
 }
@@ -75,11 +77,11 @@ int Stack_OK(Stack* stk)
 {
     if(stk -> data == NULL)
     {
-        return SEGM_FAULT;
+        return 0;
     }
-    else if(stk -> size_of_stack > 0 && stk -> capacity_of_stack > stk -> size_of_stack)
+    else if(stk -> capacity_of_stack < stk -> size_of_stack)    // && stk -> size_of_stack >= 0
     {
-        return SEGM_FAULT;
+        return 0;
     }
     
     return -1;
@@ -90,13 +92,13 @@ void Dtor(Stack* stk)
     free(stk -> data);   
 }
 
-// void fill_in_Stack(Stack* stk)
-// {
-//     for(int i = 0; i < stk -> capacity_of_stack; i++)
-//     {
-        
-//     }
-// }
+void Stack_fill_in(Stack* stk)
+{
+    for(size_t i = stk -> size_of_stack; i < stk -> capacity_of_stack; i++)
+    {
+        stk -> data[i] = Stack_defolt_value;
+    }
+}
 
 void color_printf(FILE* stream, int color, const char* format, ...)
 {

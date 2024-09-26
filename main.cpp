@@ -9,7 +9,7 @@ int main()
 
     ERROR_CHECK;
 
-    CHECK init(&stk, 10);
+    CHECK init(&stk, 1);
 
     CHECK push(&stk, 11);
 
@@ -21,7 +21,17 @@ int main()
 
     CHECK push(&stk, 16);
 
+    CHECK push(&stk, -3);
+
     dump(&stk);
+
+    CHECK pop(&stk, &del_val);
+
+    dump(&stk);
+
+    CHECK pop(&stk, &del_val);
+
+    CHECK pop(&stk, &del_val);
 
     CHECK pop(&stk, &del_val);
 

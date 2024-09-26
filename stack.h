@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 typedef double type_of_elem;
+const type_of_elem Stack_defolt_value = 0;
 
 enum Errors
 {
@@ -37,6 +38,8 @@ struct Stack
 };
 
 int init(Stack* stk, size_t capacity);
+
+void Stack_fill_in(Stack* stk);
 
 int pop(Stack* stk, type_of_elem* del_value);   
 
