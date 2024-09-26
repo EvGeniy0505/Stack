@@ -10,4 +10,4 @@ stack.o: stack.cpp
 	@g++ -c stack.cpp $(flags)
 
 clean:
-	rm *.o onegin
+	rm *.o stack

@@ -5,15 +5,17 @@ int main()
 {
     Stack stk;
 
-    int del_val = 0;
+    double del_val = 0;
 
-    init(&stk, 10);
+    int err = 0;
 
-    push(&stk, 10);
+    CHECK init(&stk, 8);
 
-    del_val = pop(&stk);
+    CHECK push(&stk, 10);
 
-    printf("%d", del_val);
+    CHECK pop(&stk, &del_val);
 
-    destructor(&stk);
+    printf("%f\n", del_val);
+
+    Dtor(&stk);
 }

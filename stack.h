@@ -1,33 +1,36 @@
 #ifndef STACK
-
 #define STACK
+
+#define CHECK if(!err) err = 
 
 #include <string.h>
 
-typedef int type_of_elem;
-const int ptr_on_first_elem = 0;
-const int coeff_of_mul = 2;
+typedef double type_of_elem;
 
-//enum
+enum Errors
+{
+    SEGM_FAULT = 0
+};
 
 struct Stack
 {
-
     size_t size_of_stack;
 
     size_t capacity_of_stack;
 
-    type_of_elem * data;
+    type_of_elem* data;
 };
 
-int pop(Stack * stk);   
+int init(Stack* stk, size_t capacity);
 
-void push(Stack * stk, type_of_elem new_stack_value);  // ��������� ����� ������� � ����, ���������������� ������
+int pop(Stack* stk, type_of_elem* del_value);   
 
-int init(Stack * stk, size_t capacity);   // ������� ����, ��-������� �����������
+int push(Stack* stk, type_of_elem new_stack_value);  
 
-//void destructor(Stack * stk);  // ������ ���, ���� ���� �� �������
+void Dtor(Stack* stk);  
 
-int Stack_OK(const Stack * stk); // �������� �� ������
+int Stack_OK(Stack* stk); 
 
-#endif // STACK
+void dump(const Stack* stk);
+
+#endif 
