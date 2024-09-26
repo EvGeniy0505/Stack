@@ -15,7 +15,7 @@ int init(Stack* stk, size_t capasity)
         return SEGM_FAULT;
     }
 
-    return -1;
+    return 0;
 }
 
 int push(Stack* stk, type_of_elem new_stack_value)
@@ -34,7 +34,7 @@ int push(Stack* stk, type_of_elem new_stack_value)
 
     stk -> size_of_stack++;
 
-    return -1;
+    return 0;
 }
 
 int pop(Stack* stk, double* del_value)
@@ -52,7 +52,7 @@ int pop(Stack* stk, double* del_value)
 
     stk -> size_of_stack--;
 
-    return -1;
+    return 0;
 }
 
 int Stack_OK(Stack* stk)

@@ -9,7 +9,7 @@ typedef double type_of_elem;
 
 enum Errors
 {
-    SEGM_FAULT = 0
+    SEGM_FAULT = -1
 };
 
 struct Stack

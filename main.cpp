@@ -7,9 +7,9 @@ int main()
 
     double del_val = 0;
 
-    int err = 1;
+    int err = 0;
 
-    CHECK init(&stk, 8);
+    CHECK init(&stk, 10);
 
     CHECK push(&stk, 10);
 
@@ -18,4 +18,6 @@ int main()
     printf("%f\n", del_val);
 
     Dtor(&stk);
+
+    return 0;
 }
