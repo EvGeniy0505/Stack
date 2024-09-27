@@ -5,10 +5,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-int init(Stack* stk, size_t capasity)
+int Stack_init(Stack* stk, size_t capacity) 
 {
-    stk -> data              = (type_of_elem*)malloc(capasity * sizeof(type_of_elem));
-    stk -> capacity_of_stack = capasity;
+    stk -> data              = (stack_elem*)malloc(capacity * sizeof(stack_elem));
+    stk -> capacity_of_stack = capacity;
     stk -> size_of_stack     = 0;
 
     Stack_fill_in(stk);
@@ -18,13 +18,15 @@ int init(Stack* stk, size_t capasity)
     return 0;
 }
 
-int push(Stack* stk, type_of_elem new_stack_value)
+int Stack_push(Stack* stk, stack_elem new_stack_value)
 {
+    assert(Stack_OK(stk));
+
     if(stk -> size_of_stack == stk -> capacity_of_stack)
     {
-        stk -> capacity_of_stack = stk -> capacity_of_stack * 2;
+        stk -> capacity_of_stack = stk -> capacity_of_stack * Stack_size_upper;
 
-        stk -> data = (type_of_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(type_of_elem)); 
+        stk -> data = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem)); 
 
         Stack_fill_in(stk);
     }
@@ -38,13 +40,15 @@ int push(Stack* stk, type_of_elem new_stack_value)
     return 0;
 }
 
-int pop(Stack* stk, double* del_value)
+int Stack_pop(Stack* stk, stack_elem* del_value)
 {
-    if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / 4)
-    {
-        stk -> capacity_of_stack = stk -> capacity_of_stack / 4;
+    assert(Stack_OK(stk));
 
-        stk -> data = (type_of_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(type_of_elem));
+    if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / Stack_size_low)
+    {
+        stk -> capacity_of_stack = stk -> capacity_of_stack / Stack_size_low; 
+
+        stk -> data = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem));
     }
 
     assert(Stack_OK(stk));
@@ -53,12 +57,12 @@ int pop(Stack* stk, double* del_value)
 
     *del_value = stk -> data[stk -> size_of_stack];
  
-    stk -> data[stk -> size_of_stack] = Stack_defolt_value;
+    stk -> data[stk -> size_of_stack] = Stack_default_value;
 
     return 0;
 }
 
-void dump(Stack* stk)
+void Stack_dump(Stack* stk)
 {
     color_printf(stdout, PURPLE, "ALL STACK: ");
 
@@ -79,7 +83,7 @@ int Stack_OK(Stack* stk)
     {
         return 0;
     }
-    else if(stk -> capacity_of_stack < stk -> size_of_stack)    // && stk -> size_of_stack >= 0
+    else if(stk -> capacity_of_stack < stk -> size_of_stack)    
     {
         return 0;
     }
@@ -87,19 +91,22 @@ int Stack_OK(Stack* stk)
     return -1;
 }
 
-void Dtor(Stack* stk)
+void Stack_Dtor(Stack* stk)
 {
-    free(stk -> data);   
+    Stack_fill_in(stk);
+    
+    free(stk -> data); 
 }
 
 void Stack_fill_in(Stack* stk)
 {
     for(size_t i = stk -> size_of_stack; i < stk -> capacity_of_stack; i++)
     {
-        stk -> data[i] = Stack_defolt_value;
+        stk -> data[i] = Stack_default_value;
     }
 }
 
+// респект
 void color_printf(FILE* stream, int color, const char* format, ...)
 {
     va_list args;

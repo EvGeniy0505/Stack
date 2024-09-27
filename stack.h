@@ -4,16 +4,17 @@
 #define CHECK if(!err) err = 
 #define ERROR_CHECK int err = 0;
 
-
-#include <string.h>
 #include <stdio.h>
 
-typedef double type_of_elem;
-const type_of_elem Stack_defolt_value = 0;
+typedef double stack_elem;
+const stack_elem Stack_default_value = 0xDEDBED;
+const int Stack_size_upper           = 2;
+const int Stack_size_low             = 4;
 
 enum Errors
 {
-    SEGM_FAULT = -1
+    SEGM_FAULT = 0,
+        
 };
 
 enum text_colors
@@ -34,23 +35,23 @@ struct Stack
 
     size_t capacity_of_stack;
 
-    type_of_elem* data;
+    stack_elem* data;
 };
 
-int init(Stack* stk, size_t capacity);
+int Stack_init(Stack* stk, size_t capacity);
 
 void Stack_fill_in(Stack* stk);
 
-int pop(Stack* stk, type_of_elem* del_value);   
+int Stack_pop(Stack* stk, stack_elem* del_value);   
 
-int push(Stack* stk, type_of_elem new_stack_value);  
+int Stack_push(Stack* stk, stack_elem new_stack_value);  
 
-void Dtor(Stack* stk);  
+void Stack_Dtor(Stack* stk);  
 
 int Stack_OK(Stack* stk); 
 
 void color_printf(FILE* stream, int color, const char* format, ...);
 
-void dump(Stack* stk);
+void Stack_dump(Stack* stk);
 
 #endif 

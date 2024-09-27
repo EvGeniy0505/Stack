@@ -9,37 +9,37 @@ int main()
 
     ERROR_CHECK;
 
-    CHECK init(&stk, 1);
+    CHECK Stack_init(&stk, 1);
 
-    CHECK push(&stk, 11);
+    CHECK Stack_push(&stk, 11);
 
-    dump(&stk);
+    Stack_dump(&stk);
 
-    CHECK push(&stk, 1007.7);
+    CHECK Stack_push(&stk, 1007.7);
 
-    CHECK push(&stk, 52);
+    CHECK Stack_push(&stk, 52);
 
-    CHECK push(&stk, 16);
+    CHECK Stack_push(&stk, 16);
 
-    CHECK push(&stk, -3);
+    CHECK Stack_push(&stk, -3);
 
-    dump(&stk);
+    Stack_dump(&stk);
 
-    CHECK pop(&stk, &del_val);
+    CHECK Stack_pop(&stk, &del_val);
 
-    dump(&stk);
+    Stack_dump(&stk);
 
-    CHECK pop(&stk, &del_val);
+    CHECK Stack_pop(&stk, &del_val);
 
-    CHECK pop(&stk, &del_val);
+    CHECK Stack_pop(&stk, &del_val);
 
-    CHECK pop(&stk, &del_val);
+    CHECK Stack_pop(&stk, &del_val);
 
-    dump(&stk);
+    Stack_dump(&stk);
 
     printf("%f\n", del_val);
 
-    Dtor(&stk);
+    Stack_Dtor(&stk);
 
     return 0;
 }
