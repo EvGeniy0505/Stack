@@ -9,37 +9,38 @@ int main()
 
     ERROR_CHECK;
 
-    CHECK Stack_init(&stk, 1);
+    CHECK_STACK_INIT(&stk, 1);
 
-    CHECK Stack_push(&stk, 11);
-
-    Stack_dump(&stk);
-
-    CHECK Stack_push(&stk, 1007.7);
-
-    CHECK Stack_push(&stk, 52);
-
-    CHECK Stack_push(&stk, 16);
-
-    CHECK Stack_push(&stk, -3);
+    CHECK_STACK_PUSH(&stk, 11);
 
     Stack_dump(&stk);
 
-    CHECK Stack_pop(&stk, &del_val);
+    CHECK_STACK_PUSH(&stk, 1007.7);
+
+    CHECK_STACK_PUSH(&stk, 52);
+
+    CHECK_STACK_PUSH(&stk, 16);
+
+    CHECK_STACK_PUSH(&stk, -3);
 
     Stack_dump(&stk);
 
-    CHECK Stack_pop(&stk, &del_val);
-
-    CHECK Stack_pop(&stk, &del_val);
-
-    CHECK Stack_pop(&stk, &del_val);
+    CHECK_STACK_POP(&stk, &del_val);
 
     Stack_dump(&stk);
 
-    printf("%f\n", del_val);
+    CHECK_STACK_POP(&stk, &del_val);
+
+    CHECK_STACK_POP(&stk, &del_val);
+
+    CHECK_STACK_POP(&stk, &del_val);
+
+    Stack_dump(&stk);
+
+    color_printf(stdout, LIGHT_BLUE, "Это значение кста нахуй удалилось: %f\n", del_val);
 
     Stack_Dtor(&stk);
 
+    color_printf(stdout, BLUE, "Всё ещё пиздец как люблю Полину Новикову\n");
     return 0;
 }

@@ -1,3 +1,6 @@
+// TODO:
+// 1) Нормально обрабатывать ошибки: возращать из функций не int, а enum ошибок, чтобы было понятнее
+//          Проверять все malloc'и и realloc'и, если Stack_OK зафейлился, тоже возвращать ошибку
 #include "stack.h"
 #include <stdio.h>
 #include <string.h>
@@ -5,7 +8,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-int Stack_init(Stack* stk, size_t capacity) 
+Errors Stack_init(Stack* stk, size_t capacity) 
 {
     stk -> data              = (stack_elem*)malloc(capacity * sizeof(stack_elem));
     stk -> capacity_of_stack = capacity;
@@ -13,45 +16,45 @@ int Stack_init(Stack* stk, size_t capacity)
 
     Stack_fill_in(stk);
 
-    assert(Stack_OK(stk));
+    CHECK_FUNC(STACK_INIT_FAULT);
 
-    return 0;
+    return ALL_OKAY;
 }
 
-int Stack_push(Stack* stk, stack_elem new_stack_value)
+Errors Stack_push(Stack* stk, stack_elem new_stack_value)
 {
-    assert(Stack_OK(stk));
+    CHECK_FUNC(STACK_PUSH_FAULT);
 
     if(stk -> size_of_stack == stk -> capacity_of_stack)
     {
-        stk -> capacity_of_stack = stk -> capacity_of_stack * Stack_size_upper;
+        stk -> capacity_of_stack = stk -> capacity_of_stack * STACK_SIZE_UPPER;
 
         stk -> data = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem)); 
 
         Stack_fill_in(stk);
     }
 
-    assert(Stack_OK(stk));
+    CHECK_FUNC(STACK_PUSH_FAULT);
 
     stk -> data[stk -> size_of_stack] = new_stack_value;
 
     stk -> size_of_stack++;
     
-    return 0;
+    return ALL_OKAY;
 }
 
-int Stack_pop(Stack* stk, stack_elem* del_value)
+Errors Stack_pop(Stack* stk, stack_elem* del_value)
 {
-    assert(Stack_OK(stk));
+    CHECK_FUNC(STACK_POP_FAULT);
 
-    if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / Stack_size_low)
+    if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / STACK_SIZE_LOWER)
     {
-        stk -> capacity_of_stack = stk -> capacity_of_stack / Stack_size_low; 
+        stk -> capacity_of_stack = stk -> capacity_of_stack / STACK_SIZE_LOWER; 
 
         stk -> data = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem));
     }
 
-    assert(Stack_OK(stk));
+    CHECK_FUNC(STACK_POP_FAULT);
 
     stk -> size_of_stack--;
 
@@ -59,7 +62,7 @@ int Stack_pop(Stack* stk, stack_elem* del_value)
  
     stk -> data[stk -> size_of_stack] = Stack_default_value;
 
-    return 0;
+    return ALL_OKAY;
 }
 
 void Stack_dump(Stack* stk)
@@ -83,7 +86,7 @@ int Stack_OK(Stack* stk)
     {
         return 0;
     }
-    else if(stk -> capacity_of_stack < stk -> size_of_stack)    
+    else if(stk -> capacity_of_stack < stk -> size_of_stack)      
     {
         return 0;
     }
@@ -100,6 +103,8 @@ void Stack_Dtor(Stack* stk)
 
 void Stack_fill_in(Stack* stk)
 {
+    assert(Stack_OK(stk));
+
     for(size_t i = stk -> size_of_stack; i < stk -> capacity_of_stack; i++)
     {
         stk -> data[i] = Stack_default_value;

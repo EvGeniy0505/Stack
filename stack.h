@@ -1,20 +1,29 @@
 #ifndef STACK
 #define STACK
 
-#define CHECK if(!err) err = 
+#define CHECK_STACK_POP(stk, del_val) if(!err) { err = Stack_pop(stk, del_val); } else { printf("%d", Stack_pop(stk, del_val)); }
+#define CHECK_STACK_PUSH(stk, new_val) if(!err) { err = Stack_push(stk, new_val); } else { printf("%d", Stack_push(stk, new_val)); }
+#define CHECK_STACK_INIT(stk, capacity) if(!err) { err = Stack_init(stk, capacity); } else { printf("%d", Stack_init(stk, capacity)); }
+
 #define ERROR_CHECK int err = 0;
+
+#define CHECK_FUNC(test) if(!Stack_OK(stk)) { return (test); }
+
+#define STACK_SIZE_UPPER 2
+#define STACK_SIZE_LOWER 4
 
 #include <stdio.h>
 
 typedef double stack_elem;
 const stack_elem Stack_default_value = 0xDEDBED;
-const int Stack_size_upper           = 2;
-const int Stack_size_low             = 4;
 
 enum Errors
 {
-    SEGM_FAULT = 0,
-        
+    ALL_OKAY,
+    SEGM_FAULT,
+    STACK_POP_FAULT,
+    STACK_PUSH_FAULT,
+    STACK_INIT_FAULT
 };
 
 enum text_colors
@@ -38,13 +47,13 @@ struct Stack
     stack_elem* data;
 };
 
-int Stack_init(Stack* stk, size_t capacity);
+Errors Stack_init(Stack* stk, size_t capacity);
 
 void Stack_fill_in(Stack* stk);
 
-int Stack_pop(Stack* stk, stack_elem* del_value);   
+Errors Stack_pop(Stack* stk, stack_elem* del_value);   
 
-int Stack_push(Stack* stk, stack_elem new_stack_value);  
+Errors Stack_push(Stack* stk, stack_elem new_stack_value);  
 
 void Stack_Dtor(Stack* stk);  
 
