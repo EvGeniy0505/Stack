@@ -37,7 +37,7 @@ int main()
 
     Stack_dump(&stk);
 
-    color_printf(stdout, LIGHT_BLUE, "Это значение кста нахуй удалилось: %f\n", del_val);
+    color_printf(stdout, LIGHT_BLUE, "Это последнее значение, которое нахуй удалилось: %f\n", del_val);
 
     Stack_Dtor(&stk);
 

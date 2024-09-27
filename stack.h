@@ -1,13 +1,24 @@
 #ifndef STACK
 #define STACK
 
-#define CHECK_STACK_POP(stk, del_val) if(!err) { err = Stack_pop(stk, del_val); } else { printf("%d", Stack_pop(stk, del_val)); }
-#define CHECK_STACK_PUSH(stk, new_val) if(!err) { err = Stack_push(stk, new_val); } else { printf("%d", Stack_push(stk, new_val)); }
-#define CHECK_STACK_INIT(stk, capacity) if(!err) { err = Stack_init(stk, capacity); } else { printf("%d", Stack_init(stk, capacity)); }
+#define CHECK_STACK_POP(stk, del_val)   if(!err)                                                               \
+                                          { err = Stack_pop(stk, del_val); }                                   \
+                                        else                                                                   \
+                                          { color_printf(stdout, RED, "Ошибка:%d", Stack_pop(stk, del_val)); } 
+
+#define CHECK_STACK_PUSH(stk, new_val)  if(!err)                                                               \
+                                          { err = Stack_push(stk, new_val); }                                  \
+                                        else                                                                   \
+                                          { color_printf(stdout, RED, "Ошибка:%d", Stack_push(stk, new_val)); }
+
+#define CHECK_STACK_INIT(stk, capacity) if(!err)                                                               \
+                                          { err = Stack_init(stk, capacity); }                                 \
+                                        else                                                                   \
+                                          { color_printf(stdout, RED, "Ошибка:%d", Stack_init(stk, capacity)); }
 
 #define ERROR_CHECK int err = 0;
 
-#define CHECK_FUNC(test) if(!Stack_OK(stk)) { return (test); }
+#define CHECK_FUNC(test) if(Stack_OK(stk)) { return test; }
 
 #define STACK_SIZE_UPPER 2
 #define STACK_SIZE_LOWER 4

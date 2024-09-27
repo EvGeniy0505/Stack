@@ -16,7 +16,7 @@ Errors Stack_init(Stack* stk, size_t capacity)
 
     Stack_fill_in(stk);
 
-    CHECK_FUNC(STACK_INIT_FAULT);
+    CHECK_FUNC(STACK_INIT_FAULT)
 
     return ALL_OKAY;
 }
@@ -34,7 +34,7 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
         Stack_fill_in(stk);
     }
 
-    CHECK_FUNC(STACK_PUSH_FAULT);
+    CHECK_FUNC(STACK_PUSH_FAULT)
 
     stk -> data[stk -> size_of_stack] = new_stack_value;
 
@@ -45,16 +45,16 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
 
 Errors Stack_pop(Stack* stk, stack_elem* del_value)
 {
-    CHECK_FUNC(STACK_POP_FAULT);
+    CHECK_FUNC(STACK_POP_FAULT)
 
     if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / STACK_SIZE_LOWER)
     {
-        stk -> capacity_of_stack = stk -> capacity_of_stack / STACK_SIZE_LOWER; 
+        stk -> capacity_of_stack = stk -> capacity_of_stack / STACK_SIZE_LOWER;      // мне кажется тут логическая ошибка
 
         stk -> data = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem));
     }
 
-    CHECK_FUNC(STACK_POP_FAULT);
+    CHECK_FUNC(STACK_POP_FAULT)
 
     stk -> size_of_stack--;
 
@@ -77,21 +77,30 @@ void Stack_dump(Stack* stk)
     putchar('\n');
 
     color_printf(stdout, GREEN, "Capacity:%zu\n", stk -> capacity_of_stack);
-    color_printf(stdout, RED, "Size:%zu\n", stk -> size_of_stack);
+    color_printf(stdout, YELLOW, "Size:%zu\n", stk -> size_of_stack);
+}
+
+
+void Stack_fill_in(Stack* stk)
+{
+    for(size_t i = stk -> size_of_stack; i < stk -> capacity_of_stack; i++)
+    {
+        stk -> data[i] = Stack_default_value;
+    }
 }
 
 int Stack_OK(Stack* stk)
 {
     if(stk -> data == NULL)
     {
-        return 0;
+        return SEGM_FAULT;
     }
-    else if(stk -> capacity_of_stack < stk -> size_of_stack)      
+    else if(stk -> capacity_of_stack < stk -> size_of_stack)       // && stk -> size_of_stack >= 0
     {
-        return 0;
+        return SEGM_FAULT;
     }
     
-    return -1;
+    return ALL_OKAY;
 }
 
 void Stack_Dtor(Stack* stk)
@@ -99,16 +108,6 @@ void Stack_Dtor(Stack* stk)
     Stack_fill_in(stk);
     
     free(stk -> data); 
-}
-
-void Stack_fill_in(Stack* stk)
-{
-    assert(Stack_OK(stk));
-
-    for(size_t i = stk -> size_of_stack; i < stk -> capacity_of_stack; i++)
-    {
-        stk -> data[i] = Stack_default_value;
-    }
 }
 
 // респект
