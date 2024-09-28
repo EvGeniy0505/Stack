@@ -8,15 +8,18 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-Errors Stack_init(Stack* stk, size_t capacity) 
+Errors Stack_init(Stack* stk, size_t capacity/*, const char* name, const char* file, int line*/) 
 {
-    stk -> data              = (stack_elem*)malloc(capacity * sizeof(stack_elem));
+    // stk -> name = name;
+    // stk -> file = file;
+
+    stk -> data              = (stack_elem*)malloc(capacity * sizeof(stack_elem));  // = 0;
     stk -> capacity_of_stack = capacity;
     stk -> size_of_stack     = 0;
 
-    Stack_fill_in(stk);
-
     CHECK_FUNC(STACK_INIT_FAULT)
+    
+    Stack_fill_in(stk);
 
     return ALL_OKAY;
 }
@@ -29,12 +32,12 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
     {
         stk -> capacity_of_stack = stk -> capacity_of_stack * STACK_SIZE_UPPER;
 
-        stk -> data = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem)); 
+        stk -> data = 0; //(stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem)); 
+
+        CHECK_FUNC(STACK_PUSH_FAULT)
 
         Stack_fill_in(stk);
     }
-
-    CHECK_FUNC(STACK_PUSH_FAULT)
 
     stk -> data[stk -> size_of_stack] = new_stack_value;
 
@@ -52,9 +55,9 @@ Errors Stack_pop(Stack* stk, stack_elem* del_value)
         stk -> capacity_of_stack = stk -> capacity_of_stack / STACK_SIZE_LOWER;      // мне кажется тут логическая ошибка
 
         stk -> data = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem));
-    }
 
-    CHECK_FUNC(STACK_POP_FAULT)
+        CHECK_FUNC(STACK_POP_FAULT)
+    }
 
     stk -> size_of_stack--;
 
@@ -89,23 +92,23 @@ void Stack_fill_in(Stack* stk)
     }
 }
 
-int Stack_OK(Stack* stk)
+bool Stack_Error(Stack* stk)
 {
     if(stk -> data == NULL)
     {
-        return SEGM_FAULT;
+        return true;
     }
     else if(stk -> capacity_of_stack < stk -> size_of_stack)       // && stk -> size_of_stack >= 0
     {
-        return SEGM_FAULT;
+        return true;
     }
     
-    return ALL_OKAY;
+    return false;
 }
 
 void Stack_Dtor(Stack* stk)
 {
-    Stack_fill_in(stk);
+    Stack_fill_in(stk);                             // POIZON
     
     free(stk -> data); 
 }
@@ -124,4 +127,20 @@ void color_printf(FILE* stream, int color, const char* format, ...)
     fprintf(stream, "\x1B[0;%dm", WHITE);
 
     va_end(args);
+}
+
+void print_error(int val)           
+{
+    if(val == STACK_POP_FAULT)
+    {
+        color_printf(stderr, RED, "Проверь анус, ошибка в попе\n");
+    }
+    else if(val == STACK_PUSH_FAULT)
+    {
+        color_printf(stderr, RED, "Ошибка в пуше, нового элемента не будет, новый элемент принял Ислам\n");
+    }
+    else if(val == STACK_INIT_FAULT)
+    {
+        color_printf(stderr, RED, "Ты долбоёб, ошибка в ините");
+    }
 }

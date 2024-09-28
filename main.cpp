@@ -3,7 +3,7 @@
 
 int main()
 {
-    Stack stk;
+    Stack stk = {};
 
     double del_val = 0;
 

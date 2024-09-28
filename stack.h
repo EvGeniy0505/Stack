@@ -1,29 +1,55 @@
 #ifndef STACK
 #define STACK
 
-#define CHECK_STACK_POP(stk, del_val)   if(!err)                                                               \
-                                          { err = Stack_pop(stk, del_val); }                                   \
-                                        else                                                                   \
-                                          { color_printf(stdout, RED, "Ошибка:%d", Stack_pop(stk, del_val)); } 
+#include <stdio.h>
+#include <assert.h>
 
-#define CHECK_STACK_PUSH(stk, new_val)  if(!err)                                                               \
-                                          { err = Stack_push(stk, new_val); }                                  \
-                                        else                                                                   \
-                                          { color_printf(stdout, RED, "Ошибка:%d", Stack_push(stk, new_val)); }
-
-#define CHECK_STACK_INIT(stk, capacity) if(!err)                                                               \
-                                          { err = Stack_init(stk, capacity); }                                 \
-                                        else                                                                   \
-                                          { color_printf(stdout, RED, "Ошибка:%d", Stack_init(stk, capacity)); }
+#define DEBUG
 
 #define ERROR_CHECK int err = 0;
 
-#define CHECK_FUNC(test) if(Stack_OK(stk)) { return test; }
+#define CHECK_STACK_POP(stk, del_val)   if(err == 0)                                                         \
+                                          {                                                                  \
+                                            err = Stack_pop(stk, del_val);                                   \
+                                          }                                                                  \
+                                        else                                                                 \
+                                          {                                                                  \
+                                            print_error(err);                                                \
+                                            assert(0);                                                       \
+                                          } 
+
+#define CHECK_STACK_PUSH(stk, new_val)  if(err == 0)                                                         \
+                                          {                                                                  \
+                                            err = Stack_push(stk, new_val);                                  \
+                                          }                                                                  \
+                                        else                                                                 \
+                                          {                                                                  \
+                                            print_error(err);                                                \
+                                            assert(0);                                                       \
+                                          }
+
+#define CHECK_STACK_INIT(stk, capacity) if(err == 0)                                                         \
+                                          {                                                                  \
+                                            err = Stack_init(stk, capacity);                                 \
+                                          }                                                                  \
+                                        else                                                                 \
+                                          {                                                                  \
+                                            print_error(err);                                                \
+                                            assert(0);                                                       \
+                                          }
+
+#define CHECK_FUNC(test) if(Stack_Error(stk) > 0) return test;
 
 #define STACK_SIZE_UPPER 2
 #define STACK_SIZE_LOWER 4
 
-#include <stdio.h>
+// #ifdef DEBUG
+//   #define ON_DEBAG(code) code
+// #else
+//   #define ON_DEBUG(code)
+// #endif
+
+//#define Stack_INIT(stk, capacity) Stack_init(stk, capacity, #stk, __FILE__, LINE)
 
 typedef double stack_elem;
 const stack_elem Stack_default_value = 0xDEDBED;
@@ -51,6 +77,10 @@ enum text_colors
 
 struct Stack
 {
+    // ON_DEBUG(const char* name);
+
+    // ON_DEBUG(const char* file);
+
     size_t size_of_stack;
 
     size_t capacity_of_stack;
@@ -58,7 +88,8 @@ struct Stack
     stack_elem* data;
 };
 
-Errors Stack_init(Stack* stk, size_t capacity);
+Errors Stack_init(Stack* stk, size_t capacity/*, 
+                  const char* name, const char* file, int line*/);
 
 void Stack_fill_in(Stack* stk);
 
@@ -68,7 +99,9 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value);
 
 void Stack_Dtor(Stack* stk);  
 
-int Stack_OK(Stack* stk); 
+bool Stack_Error(Stack* stk); 
+
+void print_error(int val);
 
 void color_printf(FILE* stream, int color, const char* format, ...);
 
