@@ -3,10 +3,11 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
 
-#define DEBUG
+// #define DEBUG
 
-#define ERROR_CHECK int err = 0;
+#define ERROR_CHECK() int err = 0;
 
 #define CHECK_STACK_POP(stk, del_val)   if(err == 0)                                                         \
                                           {                                                                  \
@@ -15,8 +16,8 @@
                                         else                                                                 \
                                           {                                                                  \
                                             print_error(err);                                                \
-                                            assert(0);                                                       \
-                                          } 
+                                            exit(0);                                                         \
+                                          }
 
 #define CHECK_STACK_PUSH(stk, new_val)  if(err == 0)                                                         \
                                           {                                                                  \
@@ -25,42 +26,45 @@
                                         else                                                                 \
                                           {                                                                  \
                                             print_error(err);                                                \
-                                            assert(0);                                                       \
+                                            exit(0);                                                         \
                                           }
 
 #define CHECK_STACK_INIT(stk, capacity) if(err == 0)                                                         \
                                           {                                                                  \
-                                            err = Stack_init(stk, capacity);                                 \
+                                            err = STACK_INIT(stk, capacity);                                 \
                                           }                                                                  \
                                         else                                                                 \
                                           {                                                                  \
                                             print_error(err);                                                \
-                                            assert(0);                                                       \
+                                            exit(0);                                                         \
                                           }
 
-#define CHECK_FUNC(test) if(Stack_Error(stk) > 0) return test;
+#define CHECK_FUNC(test) if(Stack_Error(stk) > 0) return test
 
-#define STACK_SIZE_UPPER 2
-#define STACK_SIZE_LOWER 4
+#define CHANGE_STACK_SIZE  2
+#define STACK_SIZE_LOWER   4
+#define QUANTITY_OF_CANARY 2
 
-// #ifdef DEBUG
-//   #define ON_DEBAG(code) code
-// #else
-//   #define ON_DEBUG(code)
-// #endif
+#define CANARIES_SIZE (QUANTITY_OF_CANARY * sizeof(stk -> CANARY_LEFT))
 
-//#define Stack_INIT(stk, capacity) Stack_init(stk, capacity, #stk, __FILE__, LINE)
+#ifndef NDEBUG
+  #define ON_DEBUG(code) code
+#else
+  #define ON_DEBUG(...)
+#endif
+
+#define STACK_INIT(stk, capacity) Stack_init(stk, capacity, #stk, __FILE__, __LINE__)
 
 typedef double stack_elem;
 const stack_elem Stack_default_value = 0xDEDBED;
 
 enum Errors
 {
-    ALL_OKAY,
-    SEGM_FAULT,
+    ALL_OKAY,           //сделать степенями двойки
     STACK_POP_FAULT,
     STACK_PUSH_FAULT,
-    STACK_INIT_FAULT
+    STACK_INIT_FAULT,
+    REALLOC_FAULT
 };
 
 enum text_colors
@@ -77,29 +81,39 @@ enum text_colors
 
 struct Stack
 {
-    // ON_DEBUG(const char* name);
+    unsigned int CANARY_LEFT;
 
-    // ON_DEBUG(const char* file);
+    unsigned int HASH;
+
+    ON_DEBUG(const char* name;)
+
+    ON_DEBUG(const char* file;)
+
+    ON_DEBUG(int line;)
 
     size_t size_of_stack;
 
     size_t capacity_of_stack;
 
     stack_elem* data;
+
+    unsigned int CANARY_RIGHT;
 };
 
-Errors Stack_init(Stack* stk, size_t capacity/*, 
-                  const char* name, const char* file, int line*/);
+Errors Stack_init(Stack* stk, size_t capacity,
+                  const char* name, const char* file, int line);
 
 void Stack_fill_in(Stack* stk);
 
-Errors Stack_pop(Stack* stk, stack_elem* del_value);   
+Errors Stack_pop(Stack* stk, stack_elem* del_value);
 
-Errors Stack_push(Stack* stk, stack_elem new_stack_value);  
+Errors Stack_push(Stack* stk, stack_elem new_stack_value);
 
-void Stack_Dtor(Stack* stk);  
+Errors Stack_realloc(Stack* stk);
 
-bool Stack_Error(Stack* stk); 
+void Stack_Dtor(Stack* stk);
+
+bool Stack_Error(Stack* stk);
 
 void print_error(int val);
 
@@ -107,4 +121,4 @@ void color_printf(FILE* stream, int color, const char* format, ...);
 
 void Stack_dump(Stack* stk);
 
-#endif 
+#endif

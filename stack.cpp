@@ -1,24 +1,26 @@
 // TODO:
 // 1) Нормально обрабатывать ошибки: возращать из функций не int, а enum ошибок, чтобы было понятнее
 //          Проверять все malloc'и и realloc'и, если Stack_OK зафейлился, тоже возвращать ошибку
-#include "stack.h"
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
-Errors Stack_init(Stack* stk, size_t capacity/*, const char* name, const char* file, int line*/) 
-{
-    // stk -> name = name;
-    // stk -> file = file;
+#include "stack.h"
 
-    stk -> data              = (stack_elem*)malloc(capacity * sizeof(stack_elem));  // = 0;
+Errors Stack_init(Stack* stk, size_t capacity, const char* name, const char* file, int line)
+{
+    stk -> name = name;
+    stk -> file = file;
+    stk -> line = line;
+
+    stk -> data              = (stack_elem*) calloc(1, capacity * sizeof(stack_elem) + CANARIES_SIZE);
     stk -> capacity_of_stack = capacity;
     stk -> size_of_stack     = 0;
 
-    CHECK_FUNC(STACK_INIT_FAULT)
-    
+    CHECK_FUNC(STACK_INIT_FAULT);
+
     Stack_fill_in(stk);
 
     return ALL_OKAY;
@@ -28,41 +30,25 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
 {
     CHECK_FUNC(STACK_PUSH_FAULT);
 
-    if(stk -> size_of_stack == stk -> capacity_of_stack)
-    {
-        stk -> capacity_of_stack = stk -> capacity_of_stack * STACK_SIZE_UPPER;
-
-        stk -> data = 0; //(stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem)); 
-
-        CHECK_FUNC(STACK_PUSH_FAULT)
-
-        Stack_fill_in(stk);
-    }
+    Stack_realloc(stk);
 
     stk -> data[stk -> size_of_stack] = new_stack_value;
 
     stk -> size_of_stack++;
-    
+
     return ALL_OKAY;
 }
 
 Errors Stack_pop(Stack* stk, stack_elem* del_value)
 {
-    CHECK_FUNC(STACK_POP_FAULT)
+    CHECK_FUNC(STACK_POP_FAULT);
 
-    if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / STACK_SIZE_LOWER)
-    {
-        stk -> capacity_of_stack = stk -> capacity_of_stack / STACK_SIZE_LOWER;      // мне кажется тут логическая ошибка
-
-        stk -> data = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem));
-
-        CHECK_FUNC(STACK_POP_FAULT)
-    }
+    Stack_realloc(stk);
 
     stk -> size_of_stack--;
 
     *del_value = stk -> data[stk -> size_of_stack];
- 
+
     stk -> data[stk -> size_of_stack] = Stack_default_value;
 
     return ALL_OKAY;
@@ -83,6 +69,52 @@ void Stack_dump(Stack* stk)
     color_printf(stdout, YELLOW, "Size:%zu\n", stk -> size_of_stack);
 }
 
+Errors Stack_realloc(Stack* stk)
+{
+    if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / STACK_SIZE_LOWER)
+    {
+        stk -> capacity_of_stack = stk -> capacity_of_stack / CHANGE_STACK_SIZE;
+
+        stack_elem* data_check = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem) + CANARIES_SIZE);
+
+        if(data_check == NULL)
+        {
+            Stack_dump(stk);
+
+            printf("Ошибка в реаллоке, это полный пиздец\n");
+
+            exit(0);
+        }
+
+        stk -> data = data_check;
+
+        CHECK_FUNC(STACK_POP_FAULT);
+    }
+    else if(stk -> size_of_stack == stk -> capacity_of_stack)
+    {
+        stk -> capacity_of_stack = stk -> capacity_of_stack * CHANGE_STACK_SIZE;
+
+        stack_elem* data_check = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem) + CANARIES_SIZE);
+
+        if(data_check == NULL)
+        {
+            Stack_dump(stk);
+
+            printf("Ошибка в реаллоке, это полный пиздец\n");
+
+            exit(0);
+        }
+
+        stk -> data = data_check;
+
+        CHECK_FUNC(STACK_PUSH_FAULT);
+
+        Stack_fill_in(stk);
+    }
+
+    return ALL_OKAY;
+}
+
 
 void Stack_fill_in(Stack* stk)
 {
@@ -98,19 +130,19 @@ bool Stack_Error(Stack* stk)
     {
         return true;
     }
-    else if(stk -> capacity_of_stack < stk -> size_of_stack)       // && stk -> size_of_stack >= 0
+    else if(stk -> capacity_of_stack < stk -> size_of_stack)
     {
         return true;
     }
-    
+
     return false;
 }
 
 void Stack_Dtor(Stack* stk)
 {
-    Stack_fill_in(stk);                             // POIZON
-    
-    free(stk -> data); 
+    Stack_fill_in(stk);
+
+    free(stk -> data);
 }
 
 // респект
@@ -129,7 +161,7 @@ void color_printf(FILE* stream, int color, const char* format, ...)
     va_end(args);
 }
 
-void print_error(int val)           
+void print_error(int val)
 {
     if(val == STACK_POP_FAULT)
     {

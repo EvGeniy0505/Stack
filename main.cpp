@@ -7,7 +7,7 @@ int main()
 
     double del_val = 0;
 
-    ERROR_CHECK;
+    ERROR_CHECK();
 
     CHECK_STACK_INIT(&stk, 1);
 
@@ -22,6 +22,21 @@ int main()
     CHECK_STACK_PUSH(&stk, 16);
 
     CHECK_STACK_PUSH(&stk, -3);
+    CHECK_STACK_PUSH(&stk, -3);
+    CHECK_STACK_PUSH(&stk, -3);
+    CHECK_STACK_PUSH(&stk, -3);
+    CHECK_STACK_PUSH(&stk, -3);
+    Stack_dump(&stk);
+    CHECK_STACK_POP(&stk, &del_val);
+    CHECK_STACK_POP(&stk, &del_val);
+    Stack_dump(&stk);
+    CHECK_STACK_PUSH(&stk, -3);
+    Stack_dump(&stk);
+    CHECK_STACK_POP(&stk, &del_val);
+    Stack_dump(&stk);
+    CHECK_STACK_PUSH(&stk, -3);
+    Stack_dump(&stk);
+    CHECK_STACK_POP(&stk, &del_val);
 
     Stack_dump(&stk);
 
@@ -42,5 +57,6 @@ int main()
     Stack_Dtor(&stk);
 
     color_printf(stdout, BLUE, "Всё ещё пиздец как люблю Полину Новикову\n");
+    
     return 0;
 }
