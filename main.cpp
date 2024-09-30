@@ -9,7 +9,9 @@ int main()
 
     ERROR_CHECK();
 
-    CHECK_STACK_INIT(&stk, 1);
+    CHECK_STACK_INIT(&stk, 10);
+
+    Stack_dump(&stk);
 
     // CHECK_STACK_POP(&stk, &del_val);
 
@@ -28,7 +30,7 @@ int main()
     CHECK_STACK_PUSH(&stk, -3);
     CHECK_STACK_PUSH(&stk, -3);
     CHECK_STACK_PUSH(&stk, -3);
-    //Stack_dump(&stk);
+    Stack_dump(&stk);
     CHECK_STACK_POP(&stk, &del_val);
     CHECK_STACK_POP(&stk, &del_val);
     // Stack_dump(&stk);
@@ -52,7 +54,7 @@ int main()
 
     CHECK_STACK_POP(&stk, &del_val);
 
-    // Stack_dump(&stk);
+    Stack_dump(&stk);
 
     color_printf(stdout, LIGHT_BLUE, "Это последнее значение, которое нахуй удалилось: %f\n", del_val);
 

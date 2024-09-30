@@ -11,19 +11,22 @@
 
 Errors Stack_init(Stack* stk, size_t capacity, const char* name, const char* file, int line)
 {
-
-
     stk -> name = name;
     stk -> file = file;
     stk -> line = line;
 
-    printf("%s %s %d\n", name, file, line);
-
-    stk -> data              = (stack_elem*) calloc(1, capacity * sizeof(stack_elem) + CANARIES_SIZE);
+    stk -> data              = (stack_elem*) calloc(1, capacity * sizeof(stack_elem) + sizeof(CANARY_SIZE) * QUANTITY_OF_CANARY);
     stk -> capacity_of_stack = capacity;
     stk -> size_of_stack     = 0;
 
     CHECK_FUNC(STACK_INIT_FAULT);
+
+    *((CANARY_SIZE*)(stk -> data))                                              = CANARY_VALUE;
+    *((char*)stk -> data + capacity * sizeof(stack_elem) + sizeof(CANARY_SIZE)) = CANARY_VALUE;
+    stk -> CANARY_LEFT                                                          = CANARY_VALUE;
+    stk -> CANARY_RIGHT                                                         = CANARY_VALUE;
+
+    stk -> data = (stack_elem*) ((char*)stk -> data + sizeof(CANARY_SIZE));
 
     Stack_fill_in(stk);
 
@@ -65,8 +68,8 @@ Errors Stack_pop(Stack* stk, stack_elem* del_value)
 
 void Stack_dump(Stack* stk)
 {
-    printf("Left stack canary = %d\n", stk -> CANARY_LEFT);
-    printf("Right stack canary = %d\n", stk -> CANARY_RIGHT);
+    printf("Left stack canary = %lld\n", stk -> CANARY_LEFT);
+    printf("Right stack canary = %lld\n", stk -> CANARY_RIGHT);
 
     putchar('{');
     putchar('\n');
@@ -76,7 +79,7 @@ void Stack_dump(Stack* stk)
 
     printf("    data[%p]\n", stk -> data);
 
-    color_printf(stdout, PURPLE, "    Left stack canary = %d\n", stk -> data[0]);
+    color_printf(stdout, PURPLE, "    Left stack canary = %lld\n", *((CANARY_SIZE*)((char*)stk -> data - sizeof(CANARY_SIZE))));
 
     for(size_t num_stack_val = 0; num_stack_val < stk -> capacity_of_stack; num_stack_val++)
     {
@@ -90,7 +93,7 @@ void Stack_dump(Stack* stk)
         }
     }
 
-    color_printf(stdout, PURPLE, "    Right stack canary = %d\n", stk -> CANARY_LEFT);
+    color_printf(stdout, PURPLE, "    Right stack canary = %lld\n", stk -> CANARY_LEFT);
 
     putchar('}');
     putchar('\n');
@@ -105,16 +108,19 @@ Errors Stack_realloc(Stack* stk)
     {
         stk -> capacity_of_stack = stk -> capacity_of_stack / CHANGE_STACK_SIZE;
 
-        stack_elem* data_check = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem) + CANARIES_SIZE);
+        stk -> data = (stack_elem*)((char*)stk -> data - sizeof(CANARY_SIZE));
+
+        stack_elem* data_check = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem) +
+                                                                         QUANTITY_OF_CANARY * sizeof(CANARY_SIZE));
 
         if(data_check == NULL)
         {
             Stack_dump(stk);
 
             printf("Ошибка в реаллоке, это полный пиздец\n");
-
-            exit(0);
         }
+
+        stk -> data = (stack_elem*)((char*)stk -> data + sizeof(CANARY_SIZE));
 
         stk -> data = data_check;
 
@@ -124,18 +130,21 @@ Errors Stack_realloc(Stack* stk)
     {
         stk -> capacity_of_stack = stk -> capacity_of_stack * CHANGE_STACK_SIZE;
 
-        stack_elem* data_check = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem) + CANARIES_SIZE);
+        stk -> data = (stack_elem*)((char*)stk -> data - sizeof(CANARY_SIZE));
+
+        stack_elem* data_check = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem) +
+                                                                         QUANTITY_OF_CANARY * sizeof(CANARY_SIZE));
 
         if(data_check == NULL)
         {
             Stack_dump(stk);
 
             printf("Ошибка в реаллоке, это полный пиздец\n");
-
-            exit(0);
         }
 
         stk -> data = data_check;
+
+        stk -> data = (stack_elem*)((char*)stk -> data + sizeof(CANARY_SIZE));
 
         CHECK_FUNC(STACK_PUSH_FAULT);
 
@@ -152,6 +161,7 @@ void Stack_fill_in(Stack* stk)
     {
         stk -> data[i] = Stack_default_value;
     }
+
 }
 
 bool Stack_Error(Stack* stk)

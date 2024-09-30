@@ -45,7 +45,7 @@
 #define STACK_SIZE_LOWER   4
 #define QUANTITY_OF_CANARY 2
 
-#define CANARIES_SIZE (QUANTITY_OF_CANARY * sizeof(stk -> CANARY_LEFT))
+#define CANARY_VALUE 0xDEDAB0BADED
 
 #ifndef NDEBUG
   #define ON_DEBUG(code) code
@@ -56,6 +56,7 @@
 #define STACK_INIT(stk, capacity) Stack_init(stk, capacity, #stk, __FILE__, __LINE__)
 
 typedef double stack_elem;
+typedef long long int CANARY_SIZE;
 const stack_elem Stack_default_value = 0xDEDBED;
 
 enum Errors
@@ -81,7 +82,7 @@ enum text_colors
 
 struct Stack
 {
-    unsigned int CANARY_LEFT;
+    CANARY_SIZE CANARY_LEFT;
 
     unsigned int HASH;
 
@@ -97,7 +98,7 @@ struct Stack
 
     stack_elem* data;
 
-    unsigned int CANARY_RIGHT;
+    CANARY_SIZE CANARY_RIGHT;
 };
 
 Errors Stack_init(Stack* stk, size_t capacity,
