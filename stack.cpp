@@ -11,9 +11,13 @@
 
 Errors Stack_init(Stack* stk, size_t capacity, const char* name, const char* file, int line)
 {
+
+
     stk -> name = name;
     stk -> file = file;
     stk -> line = line;
+
+    printf("%s %s %d\n", name, file, line);
 
     stk -> data              = (stack_elem*) calloc(1, capacity * sizeof(stack_elem) + CANARIES_SIZE);
     stk -> capacity_of_stack = capacity;
@@ -41,6 +45,11 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
 
 Errors Stack_pop(Stack* stk, stack_elem* del_value)
 {
+    if(stk -> size_of_stack == 0)
+    {
+        return STACK_POP_FAULT;
+    }
+
     CHECK_FUNC(STACK_POP_FAULT);
 
     Stack_realloc(stk);
@@ -56,17 +65,38 @@ Errors Stack_pop(Stack* stk, stack_elem* del_value)
 
 void Stack_dump(Stack* stk)
 {
-    color_printf(stdout, PURPLE, "ALL STACK: ");
+    printf("Left stack canary = %d\n", stk -> CANARY_LEFT);
+    printf("Right stack canary = %d\n", stk -> CANARY_RIGHT);
 
-    for(size_t i = 0; i < stk -> capacity_of_stack; i++)
-    {
-        printf("%lf ", stk -> data[i]);
-    }
-
+    putchar('{');
     putchar('\n');
 
-    color_printf(stdout, GREEN, "Capacity:%zu\n", stk -> capacity_of_stack);
-    color_printf(stdout, YELLOW, "Size:%zu\n", stk -> size_of_stack);
+    color_printf(stdout, YELLOW, "    Size = %zu\n", stk -> size_of_stack);
+    color_printf(stdout, GREEN, "    Capacity = %zu\n", stk -> capacity_of_stack);
+
+    printf("    data[%p]\n", stk -> data);
+
+    color_printf(stdout, PURPLE, "    Left stack canary = %d\n", stk -> data[0]);
+
+    for(size_t num_stack_val = 0; num_stack_val < stk -> capacity_of_stack; num_stack_val++)
+    {
+        if(stk -> data[num_stack_val] == Stack_default_value)
+        {
+            printf("    [%zu] = POIZZZON\n", num_stack_val);
+        }
+        else
+        {
+            printf("    *[%zu] = %lf\n", num_stack_val, stk -> data[num_stack_val]);
+        }
+    }
+
+    color_printf(stdout, PURPLE, "    Right stack canary = %d\n", stk -> CANARY_LEFT);
+
+    putchar('}');
+    putchar('\n');
+    putchar('\n');
+    putchar('\n');
+
 }
 
 Errors Stack_realloc(Stack* stk)
