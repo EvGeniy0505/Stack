@@ -9,24 +9,37 @@
 
 #include "stack.h"
 
+#define CHANGE_STACK_SIZE  2
+#define STACK_SIZE_LOWER   4
+#define QUANTITY_OF_CANARY 2
+
+const stack_elem Stack_default_value = 0xDEDBED;
+const canary_type Canary_value = 0xDEDAB0BA52;
+const size_t poizon = 0xB0BAAB0BA;
+
+#define LEFT_DATA_CANARY  ((canary_type*)((char*)stk -> data - sizeof(canary_type)))
+#define RIGHT_DATA_CANARY (canary_type*)((char*)stk -> data + stk -> capacity_of_stack * sizeof(stack_elem))
+
+#define CHECK_FUNC(test) if(Stack_Error(stk) > 0) return test
+
 Errors Stack_init(Stack* stk, size_t capacity, const char* name, const char* file, int line)
 {
     stk -> name = name;
     stk -> file = file;
     stk -> line = line;
 
-    stk -> data              = (stack_elem*) calloc(1, capacity * sizeof(stack_elem) + sizeof(CANARY_SIZE) * QUANTITY_OF_CANARY);
+    stk -> data              = (stack_elem*) calloc(1, capacity * sizeof(stack_elem) + QUANTITY_OF_CANARY * sizeof(canary_type));
     stk -> capacity_of_stack = capacity;
     stk -> size_of_stack     = 0;
 
     CHECK_FUNC(STACK_INIT_FAULT);
 
-    *((CANARY_SIZE*)(stk -> data))                                              = CANARY_VALUE;
-    *((char*)stk -> data + capacity * sizeof(stack_elem) + sizeof(CANARY_SIZE)) = CANARY_VALUE;
-    stk -> CANARY_LEFT                                                          = CANARY_VALUE;
-    stk -> CANARY_RIGHT                                                         = CANARY_VALUE;
+    *(canary_type*)(stk -> data)                                                              = Canary_value;
+    *(canary_type*)((char*)stk -> data + capacity * sizeof(stack_elem) + sizeof(canary_type)) = Canary_value;
+    stk -> LEFT_STACK_CANARY                                                                  = Canary_value;
+    stk -> RIGHT_STACK_CANARY                                                                 = Canary_value;
 
-    stk -> data = (stack_elem*) ((char*)stk -> data + sizeof(CANARY_SIZE));
+    stk -> data = (stack_elem*) ((char*)stk -> data + sizeof(canary_type));
 
     Stack_fill_in(stk);
 
@@ -68,8 +81,8 @@ Errors Stack_pop(Stack* stk, stack_elem* del_value)
 
 void Stack_dump(Stack* stk)
 {
-    printf("Left stack canary = %lld\n", stk -> CANARY_LEFT);
-    printf("Right stack canary = %lld\n", stk -> CANARY_RIGHT);
+    printf("Left stack canary = %lld\n", stk -> LEFT_STACK_CANARY);
+    printf("Right stack canary = %lld\n", stk -> RIGHT_STACK_CANARY);
 
     putchar('{');
     putchar('\n');
@@ -79,7 +92,7 @@ void Stack_dump(Stack* stk)
 
     printf("    data[%p]\n", stk -> data);
 
-    color_printf(stdout, PURPLE, "    Left stack canary = %lld\n", *((CANARY_SIZE*)((char*)stk -> data - sizeof(CANARY_SIZE))));
+    color_printf(stdout, PURPLE, "    Left data canary = %lld\n", *LEFT_DATA_CANARY);
 
     for(size_t num_stack_val = 0; num_stack_val < stk -> capacity_of_stack; num_stack_val++)
     {
@@ -93,7 +106,7 @@ void Stack_dump(Stack* stk)
         }
     }
 
-    color_printf(stdout, PURPLE, "    Right stack canary = %lld\n", stk -> CANARY_LEFT);
+    color_printf(stdout, PURPLE, "    Right data canary = %lld\n", *RIGHT_DATA_CANARY);
 
     putchar('}');
     putchar('\n');
@@ -104,36 +117,24 @@ void Stack_dump(Stack* stk)
 
 Errors Stack_realloc(Stack* stk)
 {
-    if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / STACK_SIZE_LOWER)
+    size_t capacity = 0;
+
+    if(stk -> size_of_stack == stk -> capacity_of_stack)
     {
-        stk -> capacity_of_stack = stk -> capacity_of_stack / CHANGE_STACK_SIZE;
-
-        stk -> data = (stack_elem*)((char*)stk -> data - sizeof(CANARY_SIZE));
-
-        stack_elem* data_check = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem) +
-                                                                         QUANTITY_OF_CANARY * sizeof(CANARY_SIZE));
-
-        if(data_check == NULL)
-        {
-            Stack_dump(stk);
-
-            printf("Ошибка в реаллоке, это полный пиздец\n");
-        }
-
-        stk -> data = (stack_elem*)((char*)stk -> data + sizeof(CANARY_SIZE));
-
-        stk -> data = data_check;
-
-        CHECK_FUNC(STACK_POP_FAULT);
+        capacity = stk -> capacity_of_stack * CHANGE_STACK_SIZE;
     }
-    else if(stk -> size_of_stack == stk -> capacity_of_stack)
+    else if(stk -> size_of_stack - 1 < stk -> capacity_of_stack / STACK_SIZE_LOWER)
     {
-        stk -> capacity_of_stack = stk -> capacity_of_stack * CHANGE_STACK_SIZE;
+        capacity = stk -> capacity_of_stack / CHANGE_STACK_SIZE;
+    }
 
-        stk -> data = (stack_elem*)((char*)stk -> data - sizeof(CANARY_SIZE));
+    if(capacity != 0)
+    {
+        *(canary_type*)((char*)stk -> data + stk -> capacity_of_stack * sizeof(stack_elem)) = Stack_default_value;
+        stk -> data = (stack_elem*)((char*)stk -> data - sizeof(canary_type));
 
-        stack_elem* data_check = (stack_elem*)realloc(stk -> data, stk -> capacity_of_stack * sizeof(stack_elem) +
-                                                                         QUANTITY_OF_CANARY * sizeof(CANARY_SIZE));
+        stack_elem* data_check = (stack_elem*)realloc(stk->data, capacity * sizeof(stack_elem) +
+                                                       QUANTITY_OF_CANARY * sizeof(canary_type));
 
         if(data_check == NULL)
         {
@@ -143,12 +144,14 @@ Errors Stack_realloc(Stack* stk)
         }
 
         stk -> data = data_check;
+        stk -> capacity_of_stack = capacity;
 
-        stk -> data = (stack_elem*)((char*)stk -> data + sizeof(CANARY_SIZE));
-
-        CHECK_FUNC(STACK_PUSH_FAULT);
+        *(canary_type*)((char*)stk -> data + stk -> capacity_of_stack * sizeof(stack_elem) + sizeof(canary_type)) = Canary_value;
+        stk -> data = (stack_elem*)((char*)stk -> data + sizeof(canary_type));
 
         Stack_fill_in(stk);
+
+        CHECK_FUNC(STACK_PUSH_FAULT);
     }
 
     return ALL_OKAY;
@@ -181,6 +184,11 @@ bool Stack_Error(Stack* stk)
 void Stack_Dtor(Stack* stk)
 {
     Stack_fill_in(stk);
+
+    stk -> size_of_stack     = poizon;
+    stk -> capacity_of_stack = poizon;
+
+    stk -> data = (stack_elem*)((char*)stk -> data - sizeof(canary_type));
 
     free(stk -> data);
 }

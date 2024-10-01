@@ -7,6 +7,14 @@
 
 // #define DEBUG
 
+#ifndef NDEBUG
+  #define ON_DEBUG(code) code
+#else
+  #define ON_DEBUG(...)
+#endif
+
+#define STACK_INIT(stk, capacity) Stack_init(stk, capacity, #stk, __FILE__, __LINE__)
+
 #define ERROR_CHECK() int err = 0;
 
 #define CHECK_STACK_POP(stk, del_val)   if(err == 0)                                                         \
@@ -16,7 +24,6 @@
                                         else                                                                 \
                                           {                                                                  \
                                             print_error(err);                                                \
-                                            exit(0);                                                         \
                                           }
 
 #define CHECK_STACK_PUSH(stk, new_val)  if(err == 0)                                                         \
@@ -26,7 +33,6 @@
                                         else                                                                 \
                                           {                                                                  \
                                             print_error(err);                                                \
-                                            exit(0);                                                         \
                                           }
 
 #define CHECK_STACK_INIT(stk, capacity) if(err == 0)                                                         \
@@ -36,28 +42,10 @@
                                         else                                                                 \
                                           {                                                                  \
                                             print_error(err);                                                \
-                                            exit(0);                                                         \
                                           }
 
-#define CHECK_FUNC(test) if(Stack_Error(stk) > 0) return test
-
-#define CHANGE_STACK_SIZE  2
-#define STACK_SIZE_LOWER   4
-#define QUANTITY_OF_CANARY 2
-
-#define CANARY_VALUE 0xDEDAB0BADED
-
-#ifndef NDEBUG
-  #define ON_DEBUG(code) code
-#else
-  #define ON_DEBUG(...)
-#endif
-
-#define STACK_INIT(stk, capacity) Stack_init(stk, capacity, #stk, __FILE__, __LINE__)
-
 typedef double stack_elem;
-typedef long long int CANARY_SIZE;
-const stack_elem Stack_default_value = 0xDEDBED;
+typedef long long int canary_type;
 
 enum Errors
 {
@@ -82,7 +70,7 @@ enum text_colors
 
 struct Stack
 {
-    CANARY_SIZE CANARY_LEFT;
+    canary_type LEFT_STACK_CANARY;
 
     unsigned int HASH;
 
@@ -98,7 +86,7 @@ struct Stack
 
     stack_elem* data;
 
-    CANARY_SIZE CANARY_RIGHT;
+    canary_type RIGHT_STACK_CANARY;
 };
 
 Errors Stack_init(Stack* stk, size_t capacity,

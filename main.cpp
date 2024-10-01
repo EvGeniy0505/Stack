@@ -9,7 +9,7 @@ int main()
 
     ERROR_CHECK();
 
-    CHECK_STACK_INIT(&stk, 10);
+    CHECK_STACK_INIT(&stk, 1);
 
     Stack_dump(&stk);
 
@@ -33,13 +33,13 @@ int main()
     Stack_dump(&stk);
     CHECK_STACK_POP(&stk, &del_val);
     CHECK_STACK_POP(&stk, &del_val);
-    // Stack_dump(&stk);
+    Stack_dump(&stk);
     CHECK_STACK_PUSH(&stk, -3);
-    // Stack_dump(&stk);
+    Stack_dump(&stk);
     CHECK_STACK_POP(&stk, &del_val);
-    // Stack_dump(&stk);
+    Stack_dump(&stk);
     CHECK_STACK_PUSH(&stk, -3);
-    // Stack_dump(&stk);
+    Stack_dump(&stk);
     CHECK_STACK_POP(&stk, &del_val);
 
     Stack_dump(&stk);
