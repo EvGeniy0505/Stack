@@ -5,7 +5,7 @@ int main()
 {
     Stack stk = {};
 
-    double del_val = 0;
+    stack_elem del_val = 0;
 
     ERROR_CHECK();
 
@@ -19,7 +19,7 @@ int main()
 
     //Stack_dump(&stk);
 
-    CHECK_STACK_PUSH(&stk, 1007.7);
+    CHECK_STACK_PUSH(&stk, 1007);
 
     CHECK_STACK_PUSH(&stk, 52);
 
@@ -30,12 +30,10 @@ int main()
     CHECK_STACK_PUSH(&stk, -3);
     CHECK_STACK_PUSH(&stk, -3);
     CHECK_STACK_PUSH(&stk, -3);
-    Stack_dump(&stk);
+    CHECK_STACK_PUSH(&stk, 0);
     CHECK_STACK_POP(&stk, &del_val);
     CHECK_STACK_POP(&stk, &del_val);
-    Stack_dump(&stk);
     CHECK_STACK_PUSH(&stk, -3);
-    Stack_dump(&stk);
     CHECK_STACK_POP(&stk, &del_val);
     Stack_dump(&stk);
     CHECK_STACK_PUSH(&stk, -3);

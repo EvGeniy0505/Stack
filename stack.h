@@ -73,7 +73,7 @@ struct Stack
 {
     canary_type LEFT_STACK_CANARY;
 
-    long long int HASH;
+    hash_type DATA_HASH;
 
     ON_DEBUG(const char* name;)
 
