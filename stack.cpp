@@ -1,6 +1,7 @@
 // TODO:
 // 1) Нормально обрабатывать ошибки: возращать из функций не int, а enum ошибок, чтобы было понятнее
 //          Проверять все malloc'и и realloc'и, если Stack_OK зафейлился, тоже возвращать ошибку
+// VERIFICATOR
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -13,9 +14,8 @@
 #define STACK_SIZE_LOWER   4
 #define QUANTITY_OF_CANARY 2
 
-const stack_elem Stack_default_value = 0xDEDBED;
+const stack_elem Stack_poizon_value = 0xDEDBED;
 const canary_type Canary_value = 0xDEDAB0BA52;
-const size_t poizon = 0xB0BAAB0BA;
 
 #define LEFT_DATA_CANARY  ((canary_type*)((char*)stk -> data - sizeof(canary_type)))
 #define RIGHT_DATA_CANARY (canary_type*)((char*)stk -> data + stk -> capacity_of_stack * sizeof(stack_elem))
@@ -28,7 +28,9 @@ Errors Stack_init(Stack* stk, size_t capacity, const char* name, const char* fil
     stk -> file = file;
     stk -> line = line;
 
-    stk -> data              = (stack_elem*) calloc(1, capacity * sizeof(stack_elem) + QUANTITY_OF_CANARY * sizeof(canary_type));
+    stk -> HASH = hash(stk);
+
+    stk -> data              = (stack_elem*) calloc(1, capacity * sizeof(canary_type) + QUANTITY_OF_CANARY * sizeof(canary_type));
     stk -> capacity_of_stack = capacity;
     stk -> size_of_stack     = 0;
 
@@ -43,6 +45,8 @@ Errors Stack_init(Stack* stk, size_t capacity, const char* name, const char* fil
 
     Stack_fill_in(stk);
 
+    stk -> HASH = hash(stk);
+
     return ALL_OKAY;
 }
 
@@ -50,11 +54,15 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
 {
     CHECK_FUNC(STACK_PUSH_FAULT);
 
+    stk -> HASH = hash(stk);
+
     Stack_realloc(stk);
 
     stk -> data[stk -> size_of_stack] = new_stack_value;
 
     stk -> size_of_stack++;
+
+    stk -> HASH = hash(stk);
 
     return ALL_OKAY;
 }
@@ -68,19 +76,25 @@ Errors Stack_pop(Stack* stk, stack_elem* del_value)
 
     CHECK_FUNC(STACK_POP_FAULT);
 
+    stk -> HASH = hash(stk);
+
     Stack_realloc(stk);
 
     stk -> size_of_stack--;
 
     *del_value = stk -> data[stk -> size_of_stack];
 
-    stk -> data[stk -> size_of_stack] = Stack_default_value;
+    stk -> data[stk -> size_of_stack] = Stack_poizon_value;
+
+    stk -> HASH = hash(stk);
 
     return ALL_OKAY;
 }
 
 void Stack_dump(Stack* stk)
 {
+    printf("Stack hash = %lld\n", stk -> HASH);
+
     printf("Left stack canary = %lld\n", stk -> LEFT_STACK_CANARY);
     printf("Right stack canary = %lld\n", stk -> RIGHT_STACK_CANARY);
 
@@ -96,7 +110,7 @@ void Stack_dump(Stack* stk)
 
     for(size_t num_stack_val = 0; num_stack_val < stk -> capacity_of_stack; num_stack_val++)
     {
-        if(stk -> data[num_stack_val] == Stack_default_value)
+        if(equal_null(stk -> data[num_stack_val] - Stack_poizon_value))
         {
             printf("    [%zu] = POIZZZON\n", num_stack_val);
         }
@@ -130,14 +144,16 @@ Errors Stack_realloc(Stack* stk)
 
     if(capacity != 0)
     {
-        *(canary_type*)((char*)stk -> data + stk -> capacity_of_stack * sizeof(stack_elem)) = Stack_default_value;
+        *(canary_type*)((char*)stk -> data + stk -> capacity_of_stack * sizeof(stack_elem)) = Stack_poizon_value;
         stk -> data = (stack_elem*)((char*)stk -> data - sizeof(canary_type));
 
-        stack_elem* data_check = (stack_elem*)realloc(stk->data, capacity * sizeof(stack_elem) +
+        stack_elem* data_check = (stack_elem*)realloc(stk->data, capacity * sizeof(canary_type) +
                                                        QUANTITY_OF_CANARY * sizeof(canary_type));
 
         if(data_check == NULL)
         {
+            stk -> data = (stack_elem*)((char*)stk -> data + sizeof(canary_type));
+
             Stack_dump(stk);
 
             printf("Ошибка в реаллоке, это полный пиздец\n");
@@ -162,7 +178,7 @@ void Stack_fill_in(Stack* stk)
 {
     for(size_t i = stk -> size_of_stack; i < stk -> capacity_of_stack; i++)
     {
-        stk -> data[i] = Stack_default_value;
+        stk -> data[i] = Stack_poizon_value;
     }
 
 }
@@ -185,8 +201,8 @@ void Stack_Dtor(Stack* stk)
 {
     Stack_fill_in(stk);
 
-    stk -> size_of_stack     = poizon;
-    stk -> capacity_of_stack = poizon;
+    stk -> size_of_stack     = Stack_poizon_value;
+    stk -> capacity_of_stack = Stack_poizon_value;
 
     stk -> data = (stack_elem*)((char*)stk -> data - sizeof(canary_type));
 
@@ -223,4 +239,34 @@ void print_error(int val)
     {
         color_printf(stderr, RED, "Ты долбоёб, ошибка в ините");
     }
+}
+
+int equal_null(double var)
+{
+    const double eps = 0.0000001;
+
+    if(abs(var) < eps)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+hash_type hash(Stack* stk)
+{
+    hash_type hash = 5381;
+
+    long long unsigned int cast_to_type = 0;
+
+    for(size_t i = 0; i < stk -> size_of_stack; i++)
+    {
+        memcpy(&cast_to_type, &(stk -> data[i]), sizeof(long long unsigned int));
+
+        hash = hash + (33 ^ cast_to_type);
+    }
+
+    return hash;
 }

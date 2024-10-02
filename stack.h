@@ -46,6 +46,7 @@
 
 typedef double stack_elem;
 typedef long long int canary_type;
+typedef u_int64_t hash_type;
 
 enum Errors
 {
@@ -72,7 +73,7 @@ struct Stack
 {
     canary_type LEFT_STACK_CANARY;
 
-    unsigned int HASH;
+    long long int HASH;
 
     ON_DEBUG(const char* name;)
 
@@ -109,5 +110,9 @@ void print_error(int val);
 void color_printf(FILE* stream, int color, const char* format, ...);
 
 void Stack_dump(Stack* stk);
+
+int equal_null(double var);
+
+hash_type hash(Stack* stk);
 
 #endif
