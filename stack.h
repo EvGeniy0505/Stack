@@ -5,56 +5,35 @@
 #include <assert.h>
 #include <stdlib.h>
 
-// #define DEBUG
+// #define NDEBUG
 
 #ifndef NDEBUG
   #define ON_DEBUG(code) code
 #else
   #define ON_DEBUG(...)
-#endif
+#endif  //NDEBUG
 
-#define STACK_INIT(stk, capacity) Stack_init(stk, capacity, #stk, __FILE__, __LINE__)
+#define ERROR_CHECK() Errors err = ALL_OKAY;
 
-#define ERROR_CHECK() int err = 0;
-
-#define CHECK_STACK_POP(stk, del_val)   if(err == 0)                                                         \
+#define CHECK_STACK_(function, stk, val)  if(err == ALL_OKAY)                                                \
                                           {                                                                  \
-                                            err = Stack_pop(stk, del_val);                                   \
-                                          }                                                                  \
-                                        else                                                                 \
-                                          {                                                                  \
-                                            print_error(err);                                                \
+                                            err = function(stk, val);                                        \
                                           }
 
-#define CHECK_STACK_PUSH(stk, new_val)  if(err == 0)                                                         \
-                                          {                                                                  \
-                                            err = Stack_push(stk, new_val);                                  \
-                                          }                                                                  \
-                                        else                                                                 \
-                                          {                                                                  \
-                                            print_error(err);                                                \
-                                          }
+#define STACK_DUMP(stk, error) Stack_dump(stk, #stk, __FILE__, __LINE__, error)
 
-#define CHECK_STACK_INIT(stk, capacity) if(err == 0)                                                         \
-                                          {                                                                  \
-                                            err = STACK_INIT(stk, capacity);                                 \
-                                          }                                                                  \
-                                        else                                                                 \
-                                          {                                                                  \
-                                            print_error(err);                                                \
-                                          }
-
-typedef double stack_elem;
+typedef int stack_elem;
 typedef long long int canary_type;
 typedef u_int64_t hash_type;
+
+#define PRINTF_TYPE_ELEM "%d"
 
 enum Errors
 {
     ALL_OKAY,           //сделать степенями двойки
-    STACK_POP_FAULT,
-    STACK_PUSH_FAULT,
-    STACK_INIT_FAULT,
-    REALLOC_FAULT
+    ALLOC_FAULT,
+    CANARY_ERROR,
+    HASH_ERROR
 };
 
 enum text_colors
@@ -90,8 +69,7 @@ struct Stack
     canary_type RIGHT_STACK_CANARY;
 };
 
-Errors Stack_init(Stack* stk, size_t capacity,
-                  const char* name, const char* file, int line);
+Errors Stack_init(Stack* stk, size_t capacity);
 
 void Stack_fill_in(Stack* stk);
 
@@ -109,10 +87,12 @@ void print_error(int val);
 
 void color_printf(FILE* stream, int color, const char* format, ...);
 
-void Stack_dump(Stack* stk);
+void Stack_dump(Stack* stk, const char* name, const char* file, int line, Errors error);
 
 int equal_null(double var);
 
 hash_type hash(Stack* stk);
 
-#endif
+const char* Error_type(Errors err);
+
+#endif //STACK

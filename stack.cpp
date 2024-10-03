@@ -23,19 +23,15 @@ const canary_type Canary_value = 0xDEDAB0BA52;
 
 #define CHECK_FUNC(test) if(Stack_Error(stk) > 0) return test
 
-Errors Stack_init(Stack* stk, size_t capacity, const char* name, const char* file, int line)
+Errors Stack_init(Stack* stk, size_t capacity)
 {
-    stk -> name = name;
-    stk -> file = file;
-    stk -> line = line;
-
     stk -> DATA_HASH = hash(stk);
 
     stk -> data              = (stack_elem*) calloc(1, (capacity + QUANTITY_OF_CANARY) * sizeof(canary_type));
     stk -> capacity_of_stack = capacity;
     stk -> size_of_stack     = 0;
 
-    CHECK_FUNC(STACK_INIT_FAULT);
+    // CHECK_FUNC(STACK_INIT_FAULT);
 
     *(canary_type*)(stk -> data)                                                               = Canary_value;
     *(canary_type*)((char*)stk -> data + capacity * sizeof(canary_type) + sizeof(canary_type)) = Canary_value;
@@ -53,7 +49,7 @@ Errors Stack_init(Stack* stk, size_t capacity, const char* name, const char* fil
 
 Errors Stack_push(Stack* stk, stack_elem new_stack_value)
 {
-    CHECK_FUNC(STACK_PUSH_FAULT);
+    // CHECK_FUNC(STACK_PUSH_FAULT);
 
     stk -> DATA_HASH = hash(stk);
 
@@ -70,12 +66,12 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
 
 Errors Stack_pop(Stack* stk, stack_elem* del_value)
 {
-    if(stk -> size_of_stack == 0)
-    {
-        return STACK_POP_FAULT;
-    }
+    // if(stk -> size_of_stack == 0)
+    // {
+    //     return STACK_POP_FAULT;
+    // }
 
-    CHECK_FUNC(STACK_POP_FAULT);
+    // CHECK_FUNC(STACK_POP_FAULT);
 
     stk -> DATA_HASH = hash(stk);
 
@@ -92,8 +88,18 @@ Errors Stack_pop(Stack* stk, stack_elem* del_value)
     return ALL_OKAY;
 }
 
-void Stack_dump(Stack* stk)
+void Stack_dump(Stack* stk, const char* name, const char* file, int line, Errors error)
 {
+    stk -> name = name;
+    stk -> file = file;
+    stk -> line = line;
+
+    printf("Stack[%p] from %s(%d)\nmain()\n", &stk, stk -> file, stk -> line);
+
+    // printf("called from %s(%d) \n", __FILE__, __LINE__);
+
+    color_printf(stdout, RED, "Stack stastus - %s\n", Error_type(error));
+
     printf("Stack hash = %lu\n", stk -> DATA_HASH);
 
     printf("Left stack canary = %lld\n", stk -> LEFT_STACK_CANARY);
@@ -105,7 +111,7 @@ void Stack_dump(Stack* stk)
     color_printf(stdout, YELLOW, "    Size = %zu\n", stk -> size_of_stack);
     color_printf(stdout, GREEN, "    Capacity = %zu\n", stk -> capacity_of_stack);
 
-    printf("    data[%p]\n", stk -> data);
+    color_printf(stdout, LIGHT_BLUE, "    data[%p]\n", stk -> data);
 
     color_printf(stdout, PURPLE, "    Left data canary = %lld\n", *LEFT_DATA_CANARY);
 
@@ -117,7 +123,9 @@ void Stack_dump(Stack* stk)
         }
         else
         {
-            printf("    *[%zu] = %lf\n", num_stack_val, *STACK_ELEM);
+            printf("    *[%zu] = ", num_stack_val);
+            printf(PRINTF_TYPE_ELEM, *STACK_ELEM);
+            putchar('\n');
         }
     }
 
@@ -127,11 +135,12 @@ void Stack_dump(Stack* stk)
     putchar('\n');
     putchar('\n');
     putchar('\n');
-
 }
 
 Errors Stack_realloc(Stack* stk)
 {
+    Errors err = ALL_OKAY;
+
     size_t capacity = 0;
 
     if(stk -> size_of_stack == stk -> capacity_of_stack)
@@ -155,9 +164,11 @@ Errors Stack_realloc(Stack* stk)
         {
             stk -> data = (stack_elem*)((char*)stk -> data + sizeof(canary_type));
 
-            Stack_dump(stk);
+            STACK_DUMP(stk, err);
 
-            printf("Ошибка в реаллоке, это полный пиздец\n");
+            color_printf(stdout, RED, "Ошибка в реаллоке, это полный пиздец\n");
+
+            return ALLOC_FAULT;
         }
 
         stk -> data = data_check;
@@ -168,7 +179,7 @@ Errors Stack_realloc(Stack* stk)
 
         Stack_fill_in(stk);
 
-        CHECK_FUNC(STACK_PUSH_FAULT);
+        // CHECK_FUNC(STACK_PUSH_FAULT);
     }
 
     return ALL_OKAY;
@@ -226,22 +237,6 @@ void color_printf(FILE* stream, int color, const char* format, ...)
     va_end(args);
 }
 
-void print_error(int val)
-{
-    if(val == STACK_POP_FAULT)
-    {
-        color_printf(stderr, RED, "Проверь анус, ошибка в попе\n");
-    }
-    else if(val == STACK_PUSH_FAULT)
-    {
-        color_printf(stderr, RED, "Ошибка в пуше, нового элемента не будет, новый элемент принял Ислам\n");
-    }
-    else if(val == STACK_INIT_FAULT)
-    {
-        color_printf(stderr, RED, "Ты долбоёб, ошибка в ините");
-    }
-}
-
 int equal_null(double var)
 {
     const double eps = 0.0000001;
@@ -270,4 +265,20 @@ hash_type hash(Stack* stk)
     }
 
     return hash;
+}
+
+#define Error_name(error_number) #error_number
+
+const char* Error_type(Errors err)
+{
+    switch(err)
+    {
+        case ALL_OKAY:     return Error_name(ALL_OKAY);
+        case CANARY_ERROR: return Error_name(CANARY_ERROR);
+        case HASH_ERROR:   return Error_name(HASH_ERROR);
+        case ALLOC_FAULT:  return Error_name(ALLOC_FAULT);
+        default:
+                           color_printf(stderr, RED, "NEW ERROR!!!!!!!!!!");
+                           assert(0);
+    }
 }

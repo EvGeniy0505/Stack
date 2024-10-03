@@ -9,52 +9,59 @@ int main()
 
     ERROR_CHECK();
 
-    CHECK_STACK_INIT(&stk, 1);
+    CHECK_STACK_(Stack_init, &stk, 1);
 
-    Stack_dump(&stk);
+    STACK_DUMP(&stk, err);
 
-    // CHECK_STACK_POP(&stk, &del_val);
+    // CHECK_STACK_(Stack_pop, &stk, &del_val);
 
-    CHECK_STACK_PUSH(&stk, 11);
+    CHECK_STACK_(Stack_push, &stk, 11);
 
-    //Stack_dump(&stk);
+    CHECK_STACK_(Stack_push, &stk, 1000 - 7);
 
-    CHECK_STACK_PUSH(&stk, 1007);
+    CHECK_STACK_(Stack_push, &stk, 52);
 
-    CHECK_STACK_PUSH(&stk, 52);
+    CHECK_STACK_(Stack_push, &stk, 16);
 
-    CHECK_STACK_PUSH(&stk, 16);
+    CHECK_STACK_(Stack_push, &stk, -3);
+    CHECK_STACK_(Stack_push, &stk, -3);
+    CHECK_STACK_(Stack_push, &stk, -3);
+    CHECK_STACK_(Stack_push, &stk, -3);
+    CHECK_STACK_(Stack_push, &stk, -3);
 
-    CHECK_STACK_PUSH(&stk, -3);
-    CHECK_STACK_PUSH(&stk, -3);
-    CHECK_STACK_PUSH(&stk, -3);
-    CHECK_STACK_PUSH(&stk, -3);
-    CHECK_STACK_PUSH(&stk, -3);
-    CHECK_STACK_PUSH(&stk, 0);
-    CHECK_STACK_POP(&stk, &del_val);
-    CHECK_STACK_POP(&stk, &del_val);
-    CHECK_STACK_PUSH(&stk, -3);
-    CHECK_STACK_POP(&stk, &del_val);
-    Stack_dump(&stk);
-    CHECK_STACK_PUSH(&stk, -3);
-    Stack_dump(&stk);
-    CHECK_STACK_POP(&stk, &del_val);
+    CHECK_STACK_(Stack_push, &stk, 0);
+    CHECK_STACK_(Stack_pop, &stk, &del_val);
+    CHECK_STACK_(Stack_pop, &stk, &del_val);
+    CHECK_STACK_(Stack_pop, &stk, &del_val);
+    CHECK_STACK_(Stack_pop, &stk, &del_val);
+    CHECK_STACK_(Stack_push, &stk, -3);
+    CHECK_STACK_(Stack_pop, &stk, &del_val);
 
-    Stack_dump(&stk);
+    STACK_DUMP(&stk, err);
 
-    CHECK_STACK_POP(&stk, &del_val);
+    CHECK_STACK_(Stack_push, &stk, -3);
+
+    STACK_DUMP(&stk, err);
+
+    CHECK_STACK_(Stack_pop, &stk, &del_val);
+
+    STACK_DUMP(&stk, err);
+
+    CHECK_STACK_(Stack_pop, &stk, &del_val);
+
 
     // Stack_dump(&stk);
 
-    CHECK_STACK_POP(&stk, &del_val);
+    CHECK_STACK_(Stack_pop, &stk, &del_val);
+    CHECK_STACK_(Stack_pop, &stk, &del_val);
+    CHECK_STACK_(Stack_pop, &stk, &del_val);
 
-    CHECK_STACK_POP(&stk, &del_val);
 
-    CHECK_STACK_POP(&stk, &del_val);
+    STACK_DUMP(&stk, err);
 
-    Stack_dump(&stk);
-
-    color_printf(stdout, LIGHT_BLUE, "Это последнее значение, которое нахуй удалилось: %f\n", del_val);
+    color_printf(stdout, LIGHT_BLUE, "Это последнее значение, которое нахуй удалилось: ");
+    color_printf(stdout, LIGHT_BLUE, PRINTF_TYPE_ELEM, del_val);
+    putchar('\n');
 
     Stack_Dtor(&stk);
 
