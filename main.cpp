@@ -41,20 +41,16 @@ int main()
 
     CHECK_STACK_(Stack_push, &stk, -3);
 
+    *(stk.data + sizeof(stack_elem)) = 3655976345634879;
+
+
     if(!err) STACK_DUMP(&stk, err);
 
     CHECK_STACK_(Stack_pop, &stk, &del_val);
 
     if(!err) STACK_DUMP(&stk, err);
 
-    CHECK_STACK_(Stack_pop, &stk, &del_val);
-
-
-    // Stack_dump(&stk);
-
-    CHECK_STACK_(Stack_pop, &stk, &del_val);
-    CHECK_STACK_(Stack_pop, &stk, &del_val);
-    CHECK_STACK_(Stack_pop, &stk, &del_val);
+    if(!err) STACK_DUMP(&stk, err);
 
 
     if(!err) STACK_DUMP(&stk, err);

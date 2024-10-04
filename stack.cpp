@@ -204,6 +204,8 @@ Errors Stack_realloc(Stack* stk)
 
     }
 
+    stk -> DATA_HASH = hash(stk);
+
     ON_DEBUG(STACK_PROTECTION)
 
     return ALL_OKAY;
