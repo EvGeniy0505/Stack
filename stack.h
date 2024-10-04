@@ -32,8 +32,10 @@ enum Errors
 {
     ALL_OKAY,           //сделать степенями двойки
     ALLOC_FAULT,
-    CANARY_ERROR,
-    HASH_ERROR
+    STACK_CANARY_ERROR,
+    DATA_CANARY_ERROR,
+    HASH_ERROR,
+    STACK_SIZE_ERROR
 };
 
 enum text_colors
@@ -81,10 +83,6 @@ Errors Stack_realloc(Stack* stk);
 
 void Stack_Dtor(Stack* stk);
 
-bool Stack_Error(Stack* stk);
-
-void print_error(int val);
-
 void color_printf(FILE* stream, int color, const char* format, ...);
 
 void Stack_dump(Stack* stk, const char* name, const char* file, int line, Errors error);
@@ -94,5 +92,7 @@ int equal_null(double var);
 hash_type hash(Stack* stk);
 
 const char* Error_type(Errors err);
+
+Errors Stack_Errors(Stack* stk);
 
 #endif //STACK
