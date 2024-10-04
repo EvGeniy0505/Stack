@@ -15,10 +15,12 @@
 
 #define ERROR_CHECK() Errors err = ALL_OKAY;
 
-#define CHECK_STACK_(function, stk, val)  if(err == ALL_OKAY)                                                \
-                                          {                                                                  \
-                                            err = function(stk, val);                                        \
-                                          }
+#define CHECK_STACK_(function, stk, val) CHECK_(function, __LINE__, __FILE__, stk, val)
+
+#define CHECK_(function, __LINE__, __FILE__, stk, val)  (stk) -> main_file = __FILE__; \
+                                                        (stk) -> main_line = __LINE__; \
+                                                        if(err == ALL_OKAY)          \
+                                                          err = function(stk, val);  \
 
 #define STACK_DUMP(stk, error) Stack_dump(stk, ON_DEBUG(#stk, __FILE__, __func__, __LINE__,) error)
 
@@ -55,8 +57,6 @@ struct Stack
 {
     canary_type LEFT_STACK_CANARY;
 
-    hash_type DATA_HASH;
-
     ON_DEBUG(const char* name;)
 
     ON_DEBUG(const char* file;)
@@ -65,11 +65,19 @@ struct Stack
 
     ON_DEBUG(const char* func;)
 
+    const char* main_file;
+
+    int main_line;
+
     size_t size_of_stack;
 
     size_t capacity_of_stack;
 
     stack_elem* data;
+
+    hash_type DATA_HASH;
+
+    hash_type STACK_HASH;
 
     canary_type RIGHT_STACK_CANARY;
 };
@@ -88,11 +96,15 @@ void Stack_Dtor(Stack* stk);
 
 void color_printf(FILE* stream, int color, const char* format, ...);
 
-void Stack_dump(Stack* stk,ON_DEBUG(const char* name, const char* file, const char* function, int line,) Errors error);
+void Stack_dump   (Stack* stk,
+                  ON_DEBUG(const char* name, const char* file, const char* function, int line,)
+                  Errors error);
 
 int equal_null(double var);
 
-hash_type hash(Stack* stk);
+hash_type data_hash(Stack* stk);
+
+
 
 const char* Error_type(Errors err);
 

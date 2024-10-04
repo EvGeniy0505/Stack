@@ -36,7 +36,7 @@ Errors Stack_error = ALL_OKAY;
 
 Errors Stack_init(Stack* stk, size_t capacity)
 {
-    stk -> DATA_HASH = hash(stk);
+    stk -> DATA_HASH = data_hash(stk);
 
     stk -> data              = (stack_elem*) calloc(1, (capacity + QUANTITY_OF_CANARY) * sizeof(canary_type));
     stk -> capacity_of_stack = capacity;
@@ -60,7 +60,7 @@ Errors Stack_init(Stack* stk, size_t capacity)
 
     Stack_fill_in(stk);
 
-    stk -> DATA_HASH = hash(stk);
+    stk -> DATA_HASH = data_hash(stk);
 
     return ALL_OKAY;
 }
@@ -69,7 +69,7 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
 {
     ON_DEBUG(STACK_PROTECTION)
 
-    stk -> DATA_HASH = hash(stk);
+    stk -> DATA_HASH = data_hash(stk);
 
     Stack_realloc(stk);
 
@@ -77,7 +77,7 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
 
     stk -> size_of_stack++;
 
-    stk -> DATA_HASH = hash(stk);
+    stk -> DATA_HASH = data_hash(stk);
 
     ON_DEBUG(STACK_PROTECTION)
 
@@ -90,7 +90,7 @@ Errors Stack_pop(Stack* stk, stack_elem* del_value)
 
     ON_DEBUG(STACK_PROTECTION)
 
-    stk -> DATA_HASH = hash(stk);
+    stk -> DATA_HASH = data_hash(stk);
 
     Stack_realloc(stk);
 
@@ -100,23 +100,27 @@ Errors Stack_pop(Stack* stk, stack_elem* del_value)
 
     stk -> data[stk -> size_of_stack] = Stack_poizon_value;
 
-    stk -> DATA_HASH = hash(stk);
+    stk -> DATA_HASH = data_hash(stk);
 
     ON_DEBUG(STACK_PROTECTION)
 
     return ALL_OKAY;
 }
 
-void Stack_dump(Stack* stk, ON_DEBUG(const char* name, const char* file, const char* function, int line,) Errors error)
+void Stack_dump(Stack* stk,
+                ON_DEBUG(const char* name, const char* file, const char* function, int line,)
+                Errors error)
 {
-    ON_DEBUG(stk -> name = name;
-             stk -> file = file;
-             stk -> line = line;
-             stk -> func = function;)
     ON_DEBUG(
-    printf("Stack[%p] from %s(%d)\nmain()\n", &stk, stk -> file, stk -> line);
+    stk -> name = name;
+    stk -> file = file;
+    stk -> line = line;
+    stk -> func = function;)
 
-    // printf("called from %s(%d) \n", __FILE__, __LINE__);
+    printf("Stack[%p] from %s(%d)\nmain()\n", &stk, stk -> main_file, stk -> main_line);
+
+    ON_DEBUG(
+    printf("called from %s(%d) \n", stk -> file, stk -> line);
 
     printf("Dump in function %s()\n", stk -> func);)
 
@@ -204,7 +208,7 @@ Errors Stack_realloc(Stack* stk)
 
     }
 
-    stk -> DATA_HASH = hash(stk);
+    stk -> DATA_HASH = data_hash(stk);
 
     ON_DEBUG(STACK_PROTECTION)
 
@@ -263,7 +267,7 @@ int equal_null(double var)
     }
 }
 
-hash_type hash(Stack* stk)
+hash_type data_hash(Stack* stk)
 {
     hash_type hash = 5381;
 
@@ -309,7 +313,7 @@ Errors Stack_Errors(Stack* stk)
         return STACK_CANARY_ERROR;
     }
 
-    hash_type new_hash = hash(stk);
+    hash_type new_hash = data_hash(stk);
 
     if(new_hash != stk -> DATA_HASH)
     {
