@@ -8,7 +8,7 @@
 // #define NDEBUG
 
 #ifndef NDEBUG
-  #define ON_DEBUG(code) code
+  #define ON_DEBUG(...) __VA_ARGS__
 #else
   #define ON_DEBUG(...)
 #endif  //NDEBUG
@@ -20,7 +20,7 @@
                                             err = function(stk, val);                                        \
                                           }
 
-#define STACK_DUMP(stk, error) Stack_dump(stk, #stk, __FILE__, __LINE__, error)
+#define STACK_DUMP(stk, error) Stack_dump(stk, ON_DEBUG(#stk, __FILE__, __func__, __LINE__,) error)
 
 typedef int stack_elem;
 typedef long long int canary_type;
@@ -35,7 +35,8 @@ enum Errors
     STACK_CANARY_ERROR,
     DATA_CANARY_ERROR,
     HASH_ERROR,
-    STACK_SIZE_ERROR
+    STACK_SIZE_ERROR,
+    NULL_PTR_ON_STACK
 };
 
 enum text_colors
@@ -62,6 +63,8 @@ struct Stack
 
     ON_DEBUG(int line;)
 
+    ON_DEBUG(const char* func;)
+
     size_t size_of_stack;
 
     size_t capacity_of_stack;
@@ -85,7 +88,7 @@ void Stack_Dtor(Stack* stk);
 
 void color_printf(FILE* stream, int color, const char* format, ...);
 
-void Stack_dump(Stack* stk, const char* name, const char* file, int line, Errors error);
+void Stack_dump(Stack* stk,ON_DEBUG(const char* name, const char* file, const char* function, int line,) Errors error);
 
 int equal_null(double var);
 

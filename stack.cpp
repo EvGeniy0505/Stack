@@ -20,7 +20,14 @@ Errors Stack_error = ALL_OKAY;
 
 #define CHECK_FUNC(test) if(Stack_Error(stk) > 0) return test
 
-#define STACK_PROTECTION  Stack_error = Stack_Errors(stk);    \
+#define POP_PROTECTION if(stk -> size_of_stack == 0)            \
+                       {                                        \
+                            Stack_error = STACK_SIZE_ERROR;     \
+                            STACK_DUMP(stk, Stack_error);       \
+                            return STACK_SIZE_ERROR;            \
+                       }
+
+#define STACK_PROTECTION  Stack_error = Stack_Errors(stk);                        \
                                 if(Stack_error != ALL_OKAY)                       \
                                 {                                                 \
                                    STACK_DUMP(stk, Stack_error);                  \
@@ -79,7 +86,7 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
 
 Errors Stack_pop(Stack* stk, stack_elem* del_value)
 {
-    ON_DEBUG(if(stk -> size_of_stack == 0) return STACK_SIZE_ERROR;)
+    ON_DEBUG(POP_PROTECTION)
 
     ON_DEBUG(STACK_PROTECTION)
 
@@ -100,15 +107,18 @@ Errors Stack_pop(Stack* stk, stack_elem* del_value)
     return ALL_OKAY;
 }
 
-void Stack_dump(Stack* stk, const char* name, const char* file, int line, Errors error)
+void Stack_dump(Stack* stk, ON_DEBUG(const char* name, const char* file, const char* function, int line,) Errors error)
 {
-    stk -> name = name;
-    stk -> file = file;
-    stk -> line = line;
-
+    ON_DEBUG(stk -> name = name;
+             stk -> file = file;
+             stk -> line = line;
+             stk -> func = function;)
+    ON_DEBUG(
     printf("Stack[%p] from %s(%d)\nmain()\n", &stk, stk -> file, stk -> line);
 
     // printf("called from %s(%d) \n", __FILE__, __LINE__);
+
+    printf("Dump in function %s()\n", stk -> func);)
 
     color_printf(stdout, RED, "Stack stastus - %s\n", Error_type(error));
 
@@ -279,6 +289,7 @@ const char* Error_type(Errors err)
         case HASH_ERROR:         return Error_name(HASH_ERROR);
         case ALLOC_FAULT:        return Error_name(ALLOC_FAULT);
         case STACK_SIZE_ERROR:   return Error_name(STACK_SIZE_ERROR);
+        case NULL_PTR_ON_STACK:  return Error_name(NULL_PTR_ON_STACK);
         default:
                            color_printf(stderr, RED, "ABOBUS NEW ERROR!!!!!!!!!!");
                            assert(0);
@@ -306,6 +317,11 @@ Errors Stack_Errors(Stack* stk)
     if(stk -> capacity_of_stack < stk -> size_of_stack)
     {
         return STACK_SIZE_ERROR;
+    }
+
+    if(stk -> data == NULL)
+    {
+        return NULL_PTR_ON_STACK;
     }
 
     return ALL_OKAY;

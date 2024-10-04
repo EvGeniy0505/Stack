@@ -37,15 +37,15 @@ int main()
     CHECK_STACK_(Stack_push, &stk, -3);
     CHECK_STACK_(Stack_pop, &stk, &del_val);
 
-    STACK_DUMP(&stk, err);
+    if(!err) STACK_DUMP(&stk, err);
 
     CHECK_STACK_(Stack_push, &stk, -3);
 
-    STACK_DUMP(&stk, err);
+    if(!err) STACK_DUMP(&stk, err);
 
     CHECK_STACK_(Stack_pop, &stk, &del_val);
 
-    STACK_DUMP(&stk, err);
+    if(!err) STACK_DUMP(&stk, err);
 
     CHECK_STACK_(Stack_pop, &stk, &del_val);
 
@@ -57,7 +57,7 @@ int main()
     CHECK_STACK_(Stack_pop, &stk, &del_val);
 
 
-    STACK_DUMP(&stk, err);
+    if(!err) STACK_DUMP(&stk, err);
 
     color_printf(stdout, LIGHT_BLUE, "Это последнее значение, которое нахуй удалилось: ");
     color_printf(stdout, LIGHT_BLUE, PRINTF_TYPE_ELEM, del_val);
