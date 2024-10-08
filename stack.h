@@ -36,7 +36,8 @@ enum Errors
     ALLOC_FAULT,
     STACK_CANARY_ERROR,
     DATA_CANARY_ERROR,
-    HASH_ERROR,
+    DATA_HASH_ERROR,
+    // STACK_HASH_ERROR,
     STACK_SIZE_ERROR,
     NULL_PTR_ON_STACK
 };
@@ -102,9 +103,9 @@ void Stack_dump   (Stack* stk,
 
 int equal_null(double var);
 
-hash_type data_hash(Stack* stk);
+hash_type data_hash (Stack* stk);
 
-
+hash_type stack_hash(Stack* stk);
 
 const char* Error_type(Errors err);
 

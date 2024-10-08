@@ -12,6 +12,6 @@ stack.o: stack.cpp
 	@g++ -c stack.cpp $(flags)
 
 clean:
-	rm *.o stack *.d
+	rm *.o stack *.d log_file.txt
 
 -include $(DEPENDENCIES)

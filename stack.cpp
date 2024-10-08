@@ -36,8 +36,6 @@ Errors Stack_error = ALL_OKAY;
 
 Errors Stack_init(Stack* stk, size_t capacity)
 {
-    stk -> DATA_HASH = data_hash(stk);
-
     stk -> data              = (stack_elem*) calloc(1, (capacity + QUANTITY_OF_CANARY) * sizeof(canary_type));
     stk -> capacity_of_stack = capacity;
     stk -> size_of_stack     = 0;
@@ -60,7 +58,10 @@ Errors Stack_init(Stack* stk, size_t capacity)
 
     Stack_fill_in(stk);
 
-    stk -> DATA_HASH = data_hash(stk);
+    stk -> DATA_HASH  = data_hash(stk);
+    stk -> STACK_HASH = stack_hash(stk);
+
+    ON_DEBUG(STACK_PROTECTION)
 
     return ALL_OKAY;
 }
@@ -70,6 +71,7 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
     ON_DEBUG(STACK_PROTECTION)
 
     stk -> DATA_HASH = data_hash(stk);
+    stk -> STACK_HASH = stack_hash(stk);
 
     Stack_realloc(stk);
 
@@ -78,6 +80,7 @@ Errors Stack_push(Stack* stk, stack_elem new_stack_value)
     stk -> size_of_stack++;
 
     stk -> DATA_HASH = data_hash(stk);
+    stk -> STACK_HASH = stack_hash(stk);
 
     ON_DEBUG(STACK_PROTECTION)
 
@@ -91,6 +94,7 @@ Errors Stack_pop(Stack* stk, stack_elem* del_value)
     ON_DEBUG(STACK_PROTECTION)
 
     stk -> DATA_HASH = data_hash(stk);
+    stk -> STACK_HASH = stack_hash(stk);
 
     Stack_realloc(stk);
 
@@ -101,6 +105,7 @@ Errors Stack_pop(Stack* stk, stack_elem* del_value)
     stk -> data[stk -> size_of_stack] = Stack_poizon_value;
 
     stk -> DATA_HASH = data_hash(stk);
+    stk -> STACK_HASH = stack_hash(stk);
 
     ON_DEBUG(STACK_PROTECTION)
 
@@ -111,56 +116,60 @@ void Stack_dump(Stack* stk,
                 ON_DEBUG(const char* name, const char* file, const char* function, int line,)
                 Errors error)
 {
+    FILE* log_file = fopen("log_file.txt", "a");
+
     ON_DEBUG(
     stk -> name = name;
     stk -> file = file;
     stk -> line = line;
     stk -> func = function;)
 
-    printf("Stack[%p] from %s(%d)\nmain()\n", &stk, stk -> main_file, stk -> main_line);
+    fprintf(log_file, "Stack[%p] from %s(%d)\nmain()\n", &stk, stk -> main_file, stk -> main_line);
 
     ON_DEBUG(
-    printf("called from %s(%d) \n", stk -> file, stk -> line);
+    fprintf(log_file, "Dump called from %s(%d) \n", stk -> file, stk -> line);
 
-    printf("Dump in function %s()\n", stk -> func);)
+    fprintf(log_file, "in function %s()\n", stk -> func);)
 
-    color_printf(stdout, RED, "Stack stastus - %s\n", Error_type(error));
+    fprintf(log_file, "Stack stastus - %s\n", Error_type(error));
 
-    printf("Stack hash = %lu\n", stk -> DATA_HASH);
+    fprintf(log_file, "Stack hash = %lu\n", stk -> DATA_HASH);
 
-    printf("Left stack canary = %lld\n", stk -> LEFT_STACK_CANARY);
-    printf("Right stack canary = %lld\n", stk -> RIGHT_STACK_CANARY);
+    fprintf(log_file, "Left stack canary = %lld\n", stk -> LEFT_STACK_CANARY);
+    fprintf(log_file, "Right stack canary = %lld\n", stk -> RIGHT_STACK_CANARY);
 
-    putchar('{');
-    putchar('\n');
+    putc('{', log_file);
+    putc('\n', log_file);
 
-    color_printf(stdout, YELLOW, "    Size = %zu\n", stk -> size_of_stack);
-    color_printf(stdout, GREEN, "    Capacity = %zu\n", stk -> capacity_of_stack);
+    fprintf(log_file, "    Size = %zu\n", stk -> size_of_stack);
+    fprintf(log_file, "    Capacity = %zu\n", stk -> capacity_of_stack);
 
-    color_printf(stdout, LIGHT_BLUE, "    data[%p]\n", stk -> data);
+    fprintf(log_file, "    data[%p]\n", stk -> data);
 
-    color_printf(stdout, PURPLE, "    Left data canary = %lld\n", *LEFT_DATA_CANARY);
+    fprintf(log_file, "    Left data canary = %lld\n", *LEFT_DATA_CANARY);
 
     for(size_t num_stack_val = 0; num_stack_val < stk -> capacity_of_stack; num_stack_val++)
     {
         if(equal_null(stk -> data[num_stack_val] - Stack_poizon_value))
         {
-            printf("    [%zu] = POIZZZON\n", num_stack_val);
+            fprintf(log_file, "    [%zu] = POIZZZON\n", num_stack_val);
         }
         else
         {
-            printf("    *[%zu] = ", num_stack_val);
-            printf(PRINTF_TYPE_ELEM, *STACK_ELEM);
-            putchar('\n');
+            fprintf(log_file, "    *[%zu] = ", num_stack_val);
+            fprintf(log_file, PRINTF_TYPE_ELEM, *STACK_ELEM);
+            putc('\n', log_file);
         }
     }
 
-    color_printf(stdout, PURPLE, "    Right data canary = %lld\n", *RIGHT_DATA_CANARY);
+    fprintf(log_file, "    Right data canary = %lld\n", *RIGHT_DATA_CANARY);
 
-    putchar('}');
-    putchar('\n');
-    putchar('\n');
-    putchar('\n');
+    putc('}', log_file);
+    putc('\n', log_file);
+    putc('\n', log_file);
+    putc('\n', log_file);
+
+    fclose(log_file);
 }
 
 Errors Stack_realloc(Stack* stk)
@@ -208,7 +217,8 @@ Errors Stack_realloc(Stack* stk)
 
     }
 
-    stk -> DATA_HASH = data_hash(stk);
+    stk -> DATA_HASH  = data_hash(stk);
+    stk -> STACK_HASH = stack_hash(stk);
 
     ON_DEBUG(STACK_PROTECTION)
 
@@ -283,6 +293,18 @@ hash_type data_hash(Stack* stk)
     return hash;
 }
 
+hash_type stack_hash(Stack* stk)
+{
+    hash_type hash = 5381;
+
+    for(size_t i = 0; i < sizeof(stk); i++)
+    {
+        hash = hash + (10 ^ sizeof(*stk));
+    }
+
+    return hash;
+}
+
 #define Error_name(error_number) #error_number
 
 const char* Error_type(Errors err)
@@ -292,7 +314,8 @@ const char* Error_type(Errors err)
         case ALL_OKAY:           return Error_name(ALL_OKAY);
         case DATA_CANARY_ERROR:  return Error_name(DATA_CANARY_ERROR);
         case STACK_CANARY_ERROR: return Error_name(STACK_CANARY_ERROR);
-        case HASH_ERROR:         return Error_name(HASH_ERROR);
+        case DATA_HASH_ERROR:    return Error_name(DATA_HASH_ERROR);
+        // case STACK_HASH_ERROR:   return Error_name(STACK_HASH_ERROR);
         case ALLOC_FAULT:        return Error_name(ALLOC_FAULT);
         case STACK_SIZE_ERROR:   return Error_name(STACK_SIZE_ERROR);
         case NULL_PTR_ON_STACK:  return Error_name(NULL_PTR_ON_STACK);
@@ -304,20 +327,9 @@ const char* Error_type(Errors err)
 
 Errors Stack_Errors(Stack* stk)
 {
-    if(*RIGHT_DATA_CANARY != Canary_value && *LEFT_DATA_CANARY != Canary_value)
+    if(stk -> data == NULL)
     {
-        return DATA_CANARY_ERROR;
-    }
-    if(stk -> LEFT_STACK_CANARY != Canary_value && stk -> RIGHT_STACK_CANARY != Canary_value)
-    {
-        return STACK_CANARY_ERROR;
-    }
-
-    hash_type new_hash = data_hash(stk);
-
-    if(new_hash != stk -> DATA_HASH)
-    {
-        return HASH_ERROR;
+        return NULL_PTR_ON_STACK;
     }
 
     if(stk -> capacity_of_stack < stk -> size_of_stack)
@@ -325,9 +337,32 @@ Errors Stack_Errors(Stack* stk)
         return STACK_SIZE_ERROR;
     }
 
-    if(stk -> data == NULL)
+    hash_type new_data_hash = data_hash(stk);
+
+    if(new_data_hash != stk -> DATA_HASH)
     {
-        return NULL_PTR_ON_STACK;
+        return DATA_HASH_ERROR;
+    }
+
+    // hash_type new_stack_hash = stack_hash(stk);
+
+    // fprintf(stderr, "new_hash = %ld\nold_hash = %ld\n", new_stack_hash, stk -> STACK_HASH);
+
+    // if(new_stack_hash != stk -> STACK_HASH)
+    // {
+    //     return STACK_HASH_ERROR;
+    // }
+
+    if(*RIGHT_DATA_CANARY != Canary_value || *LEFT_DATA_CANARY != Canary_value)
+    {
+        return DATA_CANARY_ERROR;
+    }
+
+
+    if(stk -> LEFT_STACK_CANARY != Canary_value || stk -> RIGHT_STACK_CANARY != Canary_value)
+    {
+
+        return STACK_CANARY_ERROR;
     }
 
     return ALL_OKAY;
