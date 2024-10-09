@@ -37,7 +37,7 @@ enum Errors
     STACK_CANARY_ERROR,
     DATA_CANARY_ERROR,
     DATA_HASH_ERROR,
-    // STACK_HASH_ERROR,
+    STACK_HASH_ERROR,
     STACK_SIZE_ERROR,
     NULL_PTR_ON_STACK
 };
@@ -110,5 +110,7 @@ hash_type stack_hash(Stack* stk);
 const char* Error_type(Errors err);
 
 Errors Stack_Errors(Stack* stk);
+
+hash_type fnv1a_hash(const void* arr, size_t size);
 
 #endif //STACK

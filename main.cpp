@@ -29,8 +29,6 @@ int main()
     CHECK_STACK_(Stack_push, &stk, -3);
     CHECK_STACK_(Stack_push, &stk, -3);
 
-    // stk.capacity_of_stack = 32;
-
     CHECK_STACK_(Stack_push, &stk, 0);
     CHECK_STACK_(Stack_pop, &stk, &del_val);
     CHECK_STACK_(Stack_pop, &stk, &del_val);
@@ -46,7 +44,7 @@ int main()
 
     CHECK_STACK_(Stack_push, &stk, -3);
 
-    *(stk.data + sizeof(stack_elem)) = 365597634;
+    // *(stk.data + sizeof(stack_elem)) = 365597634;
 
     CHECK_STACK_(Stack_pop, &stk, &del_val);
 
