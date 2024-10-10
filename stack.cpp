@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <math.h>
 #include <stdarg.h>
 
 #include "stack.h"
@@ -11,7 +12,7 @@
 #define STACK_SIZE_LOWER   4
 #define QUANTITY_OF_CANARY 2
 
-const stack_elem Stack_poizon_value = {};
+const stack_elem Stack_poizon_value = NAN;
 const canary_type Canary_value = 0xDEDAB0BA52;
 Errors Stack_error = ALL_OKAY;
 
@@ -145,16 +146,9 @@ void Stack_dump(Stack* stk,
 
     for(size_t num_stack_val = 0; num_stack_val < stk -> capacity_of_stack; num_stack_val++)
     {
-        // if(equal_null(stk -> data[num_stack_val] - Stack_poizon_value))
-        // {
-        //     fprintf(log_file, "    [%zu] = POIZZZON\n", num_stack_val);
-        // }
-        if (1)
-        {
-            fprintf(log_file, "    *[%zu] = ", num_stack_val);
-            fprintf(log_file, PRINTF_TYPE_ELEM, *STACK_ELEM);
-            putc('\n', log_file);
-        }
+        fprintf(log_file, "    *[%zu] = ", num_stack_val);
+        fprintf(log_file, PRINTF_TYPE_ELEM, *STACK_ELEM);
+        putc('\n', log_file);
     }
 
     canary_type local_right_data_canary = 0;
