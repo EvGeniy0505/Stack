@@ -111,6 +111,8 @@ const char* Error_type(Errors err);
 
 Errors Stack_Errors(Stack* stk);
 
+hash_type djb2_hash(const void* data, size_t size);
+
 hash_type fnv1a_hash(const void* arr, size_t size);
 
 #endif //STACK

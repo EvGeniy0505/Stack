@@ -16,7 +16,7 @@ Errors Stack_error = ALL_OKAY;
 
 #define STACK_ELEM ((stack_elem*)((char*)stk -> data + sizeof(stack_elem) * num_stack_val))
 #define LEFT_DATA_CANARY  (canary_type*)((char*)stk -> data - sizeof(canary_type))
-#define RIGHT_DATA_CANARY (canary_type*)((char*)stk -> data + sizeof(canary_type) * stk -> capacity_of_stack)
+#define RIGHT_DATA_CANARY (canary_type*)(stk -> data + stk -> capacity_of_stack)
 
 #define CHECK_FUNC(test) if(Stack_Error(stk) > 0) return test
 
@@ -36,7 +36,7 @@ Errors Stack_error = ALL_OKAY;
 
 Errors Stack_init(Stack* stk, size_t capacity)
 {
-    stk -> data              = (stack_elem*) calloc(1, (capacity + QUANTITY_OF_CANARY) * sizeof(canary_type));
+    stk -> data              = (stack_elem*) calloc(1, capacity * sizeof(stack_elem) + QUANTITY_OF_CANARY * sizeof(canary_type));
     stk -> capacity_of_stack = capacity;
     stk -> size_of_stack     = 0;
 
@@ -49,12 +49,13 @@ Errors Stack_init(Stack* stk, size_t capacity)
         return ALLOC_FAULT;
     })
 
-    *(canary_type*)(stk -> data)                                                               = Canary_value;
-    *(canary_type*)((char*)stk -> data + capacity * sizeof(canary_type) + sizeof(canary_type)) = Canary_value;
-    stk -> LEFT_STACK_CANARY                                                                   = Canary_value;
-    stk -> RIGHT_STACK_CANARY                                                                  = Canary_value;
+    stk -> LEFT_STACK_CANARY     = Canary_value;
+    stk -> RIGHT_STACK_CANARY    = Canary_value;
+    *(canary_type*)(stk -> data) = Canary_value;
 
-    stk -> data = (stack_elem*) ((char*)stk -> data + sizeof(canary_type));
+    stk -> data = (stack_elem*)((char*)stk -> data + sizeof(canary_type));
+
+    memcpy((canary_type*)(stk -> data + capacity), &Canary_value, sizeof(canary_type));
 
     Stack_fill_in(stk);
 
@@ -157,7 +158,10 @@ void Stack_dump(Stack* stk,
         }
     }
 
-    fprintf(log_file, "    Right data canary = %lld\n", *RIGHT_DATA_CANARY);
+    canary_type local_right_data_canary = 0;
+    memcpy(&local_right_data_canary, RIGHT_DATA_CANARY, sizeof(canary_type));
+
+    fprintf(log_file, "    Right data canary = %lld\n", local_right_data_canary);
 
     putc('}', log_file);
     putc('\n', log_file);
@@ -184,7 +188,6 @@ Errors Stack_realloc(Stack* stk)
 
     if(capacity != 0)
     {
-        *(stack_elem*)((char*)stk -> data + stk -> capacity_of_stack * sizeof(canary_type)) = Stack_poizon_value;
         stk -> data = (stack_elem*)((char*)stk -> data - sizeof(canary_type));
 
         stack_elem* data_check = (stack_elem*)realloc(stk->data, capacity * sizeof(canary_type) +
@@ -204,8 +207,8 @@ Errors Stack_realloc(Stack* stk)
         stk -> data = data_check;
         stk -> capacity_of_stack = capacity;
 
-        *(canary_type*)((char*)stk -> data + stk -> capacity_of_stack * sizeof(canary_type) + sizeof(canary_type)) = Canary_value;
         stk -> data = (stack_elem*)((char*)stk -> data + sizeof(canary_type));
+        memcpy((canary_type*)(stk -> data + capacity), &Canary_value, sizeof(canary_type));
 
         Stack_fill_in(stk);
     }
@@ -217,7 +220,6 @@ Errors Stack_realloc(Stack* stk)
 
     return ALL_OKAY;
 }
-
 
 void Stack_fill_in(Stack* stk)
 {
@@ -271,18 +273,7 @@ int equal_null(double var)
 
 hash_type data_hash(Stack* stk)
 {
-    // hash_type hash = 5381;                               // Второй варик расчета хэша(djb2)
-
-    // long long unsigned int cast_to_type = 0;
-
-    // for(size_t i = 0; i < stk -> size_of_stack; i++)
-    // {
-    //     memcpy(&cast_to_type, &(stk -> data[i]), sizeof(long long unsigned int));
-
-    //     hash = hash + (33 ^ cast_to_type);
-    // }
-
-    hash_type hash = fnv1a_hash(stk -> data, stk -> capacity_of_stack * sizeof(stk -> data[0]));
+    hash_type hash = djb2_hash(stk -> data, stk -> capacity_of_stack * sizeof(stk -> data[0]));
 
     return hash;
 }
@@ -341,6 +332,24 @@ hash_type fnv1a_hash(const void* data, size_t size)
     return hash;
 }
 
+hash_type djb2_hash(const void* data, size_t size)
+{
+    hash_type hash = 5381;                               // Второй варик расчета хэша(djb2)
+
+    long long unsigned int cast_to_type = 0;
+
+    const unsigned char* data_new = (const unsigned char*) data;
+
+    for(size_t i = 0; i < size; i++)
+    {
+        memcpy(&cast_to_type, &(data_new[i]), sizeof(long long unsigned int));
+
+        hash = hash + (33 ^ cast_to_type);
+    }
+
+    return hash;
+}
+
 #define Error_name(error_number) #error_number
 
 const char* Error_type(Errors err)
@@ -387,7 +396,10 @@ Errors Stack_Errors(Stack* stk)
         return DATA_HASH_ERROR;
     }
 
-    if(*RIGHT_DATA_CANARY != Canary_value || *LEFT_DATA_CANARY != Canary_value)
+    canary_type local_right_data_canary = 0;
+    memcpy(&local_right_data_canary, RIGHT_DATA_CANARY, sizeof(canary_type));
+
+    if(local_right_data_canary != Canary_value || *LEFT_DATA_CANARY != Canary_value)
     {
         return DATA_CANARY_ERROR;
     }
