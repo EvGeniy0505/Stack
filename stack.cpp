@@ -190,7 +190,7 @@ Errors Stack_realloc(Stack* stk)
     {
         stk -> data = (stack_elem*)((char*)stk -> data - sizeof(canary_type));
 
-        stack_elem* data_check = (stack_elem*)realloc(stk->data, capacity * sizeof(canary_type) +
+        stack_elem* data_check = (stack_elem*)realloc(stk->data, capacity * sizeof(stack_elem) +
                                                        QUANTITY_OF_CANARY * sizeof(canary_type));
 
         ON_DEBUG(if(data_check == NULL)
