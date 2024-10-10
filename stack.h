@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-// #define NDEBUG
+#define NDEBUG
 
 #ifndef NDEBUG
   #define ON_DEBUG(...) __VA_ARGS__
@@ -24,15 +24,20 @@
 
 #define STACK_DUMP(stk, error) Stack_dump(stk, ON_DEBUG(#stk, __FILE__, __func__, __LINE__,) error)
 
-typedef int stack_elem;
+struct BigStruct
+{
+  double data[1000];
+};
+
+typedef BigStruct stack_elem;
 typedef long long int canary_type;
 typedef u_int64_t hash_type;
 
-#define PRINTF_TYPE_ELEM "%d"
+#define PRINTF_TYPE_ELEM "%f"
 
 enum Errors
 {
-    ALL_OKAY,           //сделать степенями двойки
+    ALL_OKAY,
     ALLOC_FAULT,
     STACK_CANARY_ERROR,
     DATA_CANARY_ERROR,

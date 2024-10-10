@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
@@ -10,15 +11,13 @@
 #define STACK_SIZE_LOWER   4
 #define QUANTITY_OF_CANARY 2
 
-const stack_elem Stack_poizon_value = 0xDEDBED;
+const stack_elem Stack_poizon_value = {};
 const canary_type Canary_value = 0xDEDAB0BA52;
 Errors Stack_error = ALL_OKAY;
 
 #define STACK_ELEM ((stack_elem*)((char*)stk -> data + sizeof(stack_elem) * num_stack_val))
 #define LEFT_DATA_CANARY  (canary_type*)((char*)stk -> data - sizeof(canary_type))
 #define RIGHT_DATA_CANARY (canary_type*)(stk -> data + stk -> capacity_of_stack)
-
-#define CHECK_FUNC(test) if(Stack_Error(stk) > 0) return test
 
 #define POP_PROTECTION if(stk -> size_of_stack == 0)            \
                        {                                        \
@@ -119,11 +118,11 @@ void Stack_dump(Stack* stk,
     stk -> line = line;
     stk -> func = function;
 
-    fprintf(log_file, "Stack[%p]\nLast stack function: %s(%d)\nmain()\n", &stk, stk -> main_file, stk -> main_line);)
+    fprintf(log_file, "Stack[%p]\nLast stack function: %s(%d)\nmain()\n", &stk, stk -> main_file, stk -> main_line);
 
     fprintf(log_file, "Dump called from %s(%d) \n", stk -> file, stk -> line);
 
-    fprintf(log_file, "in function %s()\n", stk -> func);
+    fprintf(log_file, "in function %s()\n", stk -> func);)
 
     fprintf(log_file, "Stack stastus - %s\n", Error_type(error));
 
@@ -146,11 +145,11 @@ void Stack_dump(Stack* stk,
 
     for(size_t num_stack_val = 0; num_stack_val < stk -> capacity_of_stack; num_stack_val++)
     {
-        if(equal_null(stk -> data[num_stack_val] - Stack_poizon_value))
-        {
-            fprintf(log_file, "    [%zu] = POIZZZON\n", num_stack_val);
-        }
-        else
+        // if(equal_null(stk -> data[num_stack_val] - Stack_poizon_value))
+        // {
+        //     fprintf(log_file, "    [%zu] = POIZZZON\n", num_stack_val);
+        // }
+        if (1)
         {
             fprintf(log_file, "    *[%zu] = ", num_stack_val);
             fprintf(log_file, PRINTF_TYPE_ELEM, *STACK_ELEM);
@@ -233,8 +232,8 @@ void Stack_Dtor(Stack* stk)
 {
     Stack_fill_in(stk);
 
-    stk -> size_of_stack     = Stack_poizon_value;
-    stk -> capacity_of_stack = Stack_poizon_value;
+    stk -> size_of_stack     = -1;
+    stk -> capacity_of_stack = -1;
 
     stk -> data = (stack_elem*)((char*)stk -> data - sizeof(canary_type));
 
