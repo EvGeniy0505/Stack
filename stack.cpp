@@ -234,22 +234,6 @@ void Stack_Dtor(Stack* stk)
     free(stk -> data);
 }
 
-// респект
-void color_printf(FILE* stream, int color, const char* format, ...)
-{
-    va_list args;
-
-    va_start(args, format);
-
-    fprintf(stream, "\x1B[7;%dm", color);
-
-    vfprintf(stream, format, args);
-
-    fprintf(stream, "\x1B[0;%dm", WHITE);
-
-    va_end(args);
-}
-
 int equal_null(double var)
 {
     const double eps = 0.0000001;
@@ -358,7 +342,7 @@ const char* Error_type(Errors err)
         case STACK_SIZE_ERROR:   return Error_name(STACK_SIZE_ERROR);
         case NULL_PTR_ON_STACK:  return Error_name(NULL_PTR_ON_STACK);
         default:
-                           color_printf(stderr, RED, "ABOBUS NEW ERROR!!!!!!!!!!");
+                           fprintf(stderr, "ABOBUS NEW ERROR!!!!!!!!!!");
                            assert(0);
     }
 }

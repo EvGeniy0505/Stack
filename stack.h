@@ -42,18 +42,6 @@ enum Errors
     NULL_PTR_ON_STACK
 };
 
-enum text_colors
-{
-    BLACK = 30,
-    RED,
-    GREEN,
-    YELLOW,
-    BLUE,
-    PURPLE,
-    LIGHT_BLUE,
-    WHITE
-};
-
 struct Stack
 {
     canary_type LEFT_STACK_CANARY;
