@@ -4,3 +4,9 @@
 stack
 log_file.txt
 build/
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles/
+test_stack
+libstack.a
+Makefile
