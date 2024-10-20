@@ -83,8 +83,6 @@ Errors Stack_realloc(Stack* stk);
 
 void Stack_Dtor(Stack* stk);
 
-void color_printf(FILE* stream, int color, const char* format, ...);
-
 void Stack_dump   (Stack* stk,
                   ON_DEBUG(const char* name, const char* file, const char* function, int line,)
                   Errors error);
