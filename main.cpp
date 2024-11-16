@@ -72,7 +72,7 @@ int main()
 
     // Stack_Dtor(&stk);
 
-    color_printf(stdout, BLUE, "Всё ещё пиздец как люблю Полину Новикову\n");
+    // color_printf(stdout, BLUE, "Всё ещё пиздец как люблю Полину Новикову\n");
 
     return 0;
 }

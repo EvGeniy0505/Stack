@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <math.h>
 #include <stdarg.h>
 
 #include "stack.h"
@@ -11,7 +12,7 @@
 #define STACK_SIZE_LOWER   4
 #define QUANTITY_OF_CANARY 2
 
-const stack_elem Stack_poizon_value = {};
+const stack_elem Stack_poizon_value = NAN;
 const canary_type Canary_value = 0xDEDAB0BA52;
 Errors Stack_error = ALL_OKAY;
 
@@ -145,16 +146,9 @@ void Stack_dump(Stack* stk,
 
     for(size_t num_stack_val = 0; num_stack_val < stk -> capacity_of_stack; num_stack_val++)
     {
-        // if(equal_null(stk -> data[num_stack_val] - Stack_poizon_value))
-        // {
-        //     fprintf(log_file, "    [%zu] = POIZZZON\n", num_stack_val);
-        // }
-        if (1)
-        {
-            fprintf(log_file, "    *[%zu] = ", num_stack_val);
-            fprintf(log_file, PRINTF_TYPE_ELEM, *STACK_ELEM);
-            putc('\n', log_file);
-        }
+        fprintf(log_file, "    *[%zu] = ", num_stack_val);
+        fprintf(log_file, PRINTF_TYPE_ELEM, *STACK_ELEM);
+        putc('\n', log_file);
     }
 
     canary_type local_right_data_canary = 0;
@@ -238,22 +232,6 @@ void Stack_Dtor(Stack* stk)
     stk -> data = (stack_elem*)((char*)stk -> data - sizeof(canary_type));
 
     free(stk -> data);
-}
-
-// респект
-void color_printf(FILE* stream, int color, const char* format, ...)
-{
-    va_list args;
-
-    va_start(args, format);
-
-    fprintf(stream, "\x1B[7;%dm", color);
-
-    vfprintf(stream, format, args);
-
-    fprintf(stream, "\x1B[0;%dm", WHITE);
-
-    va_end(args);
 }
 
 int equal_null(double var)
@@ -364,7 +342,7 @@ const char* Error_type(Errors err)
         case STACK_SIZE_ERROR:   return Error_name(STACK_SIZE_ERROR);
         case NULL_PTR_ON_STACK:  return Error_name(NULL_PTR_ON_STACK);
         default:
-                           color_printf(stderr, RED, "ABOBUS NEW ERROR!!!!!!!!!!");
+                           fprintf(stderr, "ABOBUS NEW ERROR!!!!!!!!!!");
                            assert(0);
     }
 }
