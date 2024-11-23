@@ -17,6 +17,7 @@
 
 #define CHECK_STACK_(function, stk, val) CHECK_(function, __LINE__, __FILE__, stk, val)
 
+// FIX: ты же функции с таким отступом не пишешь
 #define CHECK_(function, __LINE__, __FILE__, stk, val)  (stk) -> main_file = __FILE__; \
                                                         (stk) -> main_line = __LINE__; \
                                                         if(err == ALL_OKAY)          \
@@ -26,6 +27,8 @@
 
 typedef double stack_elem;
 typedef long long int canary_type;
+
+// HACK:vvvvvvvvv вообще этот тип с нормальным названием лежит в stdint.h
 typedef u_int64_t hash_type;
 
 #define PRINTF_TYPE_ELEM "%lf"
@@ -83,12 +86,14 @@ Errors Stack_realloc(Stack* stk);
 
 void Stack_Dtor(Stack* stk);
 
+// FIX: странное форматирование
 void Stack_dump   (Stack* stk,
                   ON_DEBUG(const char* name, const char* file, const char* function, int line,)
                   Errors error);
 
 int equal_null(double var);
 
+// HACK: есть смысл пробельчики добавлять, если у тебя сплошником стоит
 hash_type data_hash (Stack* stk);
 
 hash_type stack_hash(Stack* stk);

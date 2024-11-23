@@ -12,6 +12,7 @@
 #define STACK_SIZE_LOWER   4
 #define QUANTITY_OF_CANARY 2
 
+// TODO: почему не static?
 const stack_elem Stack_poizon_value = NAN;
 const canary_type Canary_value = 0xDEDAB0BA52;
 Errors Stack_error = ALL_OKAY;
@@ -20,6 +21,7 @@ Errors Stack_error = ALL_OKAY;
 #define LEFT_DATA_CANARY  (canary_type*)((char*)stk -> data - sizeof(canary_type))
 #define RIGHT_DATA_CANARY (canary_type*)(stk -> data + stk -> capacity_of_stack)
 
+// TODO: форматирование капец некрасивое. Удобнее, когда дефайн выглядит как функция
 #define POP_PROTECTION if(stk -> size_of_stack == 0)            \
                        {                                        \
                             Stack_error = STACK_SIZE_ERROR;     \
@@ -27,6 +29,7 @@ Errors Stack_error = ALL_OKAY;
                             return STACK_SIZE_ERROR;            \
                        }
 
+// TODO: форматирование капец некрасивое. Удобнее, когда дефайн выглядит как функция
 #define STACK_PROTECTION  Stack_error = Stack_Errors(stk);                        \
                                 if(Stack_error != ALL_OKAY)                       \
                                 {                                                 \
@@ -34,12 +37,17 @@ Errors Stack_error = ALL_OKAY;
                                    return Stack_error;                            \
                                 }
 
+// FIX: где ассерты?
+
 Errors Stack_init(Stack* stk, size_t capacity)
 {
+    // HACK: у меня эта строка еле на экране помещается. Можно же весь этот конченный размер отдельно в
+    // в переменной посчитать
     stk -> data              = (stack_elem*) calloc(1, capacity * sizeof(stack_elem) + QUANTITY_OF_CANARY * sizeof(canary_type));
     stk -> capacity_of_stack = capacity;
     stk -> size_of_stack     = 0;
 
+    // FIX: а если не в дебаге калок пососал? норм типа?
     ON_DEBUG(if(stk -> data == NULL)
     {
         color_printf(stdout, RED, "Ошибка в calloce, это полный пиздец\n");
@@ -113,6 +121,7 @@ void Stack_dump(Stack* stk,
 {
     FILE* log_file = fopen("log_file.txt", "a");
 
+    // WARNING: зачем выключать возможность нормального дампа не в debug режиме?
     ON_DEBUG(
     stk -> name = name;
     stk -> file = file;
@@ -156,6 +165,7 @@ void Stack_dump(Stack* stk,
 
     fprintf(log_file, "    Right data canary = %lld\n", local_right_data_canary);
 
+    // HACK: можно fprintf
     putc('}', log_file);
     putc('\n', log_file);
     putc('\n', log_file);
@@ -186,6 +196,7 @@ Errors Stack_realloc(Stack* stk)
         stack_elem* data_check = (stack_elem*)realloc(stk->data, capacity * sizeof(stack_elem) +
                                                        QUANTITY_OF_CANARY * sizeof(canary_type));
 
+        // FIX: а если не в дебаге калок пососал? норм типа?
         ON_DEBUG(if(data_check == NULL)
         {
             stk -> data = (stack_elem*)((char*)stk -> data + sizeof(canary_type));
@@ -214,6 +225,7 @@ Errors Stack_realloc(Stack* stk)
     return ALL_OKAY;
 }
 
+// WARNING: Fill in - это заполнить чем-то, а яд не что-то. Лучше что-то про poison добавить
 void Stack_fill_in(Stack* stk)
 {
     for(size_t i = stk -> size_of_stack; i < stk -> capacity_of_stack; i++)
@@ -226,6 +238,7 @@ void Stack_Dtor(Stack* stk)
 {
     Stack_fill_in(stk);
 
+    // FIX:                    vv магические числа
     stk -> size_of_stack     = -1;
     stk -> capacity_of_stack = -1;
 
@@ -238,6 +251,8 @@ int equal_null(double var)
 {
     const double eps = 0.0000001;
 
+    // HACK: во-первых есть bool, true, false, лучше их использовать
+    // во-вторых можно просто return abs(var) < eps.
     if(abs(var) < eps)
     {
         return 1;

@@ -1,3 +1,4 @@
+// FIX: свои инклюды в конце надо
 #include "stack.h"
 #include <stdio.h>
 
